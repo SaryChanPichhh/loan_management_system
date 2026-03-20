@@ -18,58 +18,69 @@
                         <th></th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>01-CUS-00001</td>
-                        <td>នី សំរ៉ាងមាលតី</td>
-                        <td>ស្រី</td>
-                        <td>03125555</td>
-                        <td>ខេត្តកណ្តាល</td>
-                        <td>អតិថិជនទូទៅ</td>
-                        <td>
-                            <span class="text-success">កំពុងកម្ចី</span>
-                        </td>
+                    <tbody>
+    @foreach($customers as $key => $c)  
+    <tr>
+        <td>{{ $key + 1 }}</td>
+        <td>{{ $c->code }}</td>
+        <td>{{ $c->name }}</td>
+        <td>{{ $c->gender == 'Male' ? 'ប្រុស' : 'ស្រី' }}</td>
+        <td>{{ $c->phone }}</td>
+        <td>{{ $c->address }}</td>
+        <td>{{ $c->type }}</td>
 
-                        <td class="text-center">
-                            <i class="fas fa-download text-primary" style="cursor:pointer;" data-toggle="modal"
-                                data-target="#imageModal"
-                                data-image="{{ asset('backend_assets/assets/images/favicon.png') }}">
-                            </i>
-                        </td>
+        <td>
+            @if($c->status)
+                <span class="text-success">កំពុងដំណើរការ</span>
+            @else
+                <span class="text-danger">ផ្អាក</span>
+            @endif
+        </td>
 
-                        <td>
+        <td class="text-center">
+            @if($c->document)
+                <i class="fas fa-download text-primary"
+                   style="cursor:pointer;"
+                   data-toggle="modal"
+                   data-target="#imageModal"
+                   data-image="{{ asset('uploads/'.$c->document) }}">
+                </i>
+            @endif
+        </td>
 
-                            <div class="dropdown sub-dropdown ">
-                                <a class=" btn-link text-muted dropdown-toggle" type="button" id="dd1"
-                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <i data-feather="more-horizontal"></i>
-                                </a>
-                                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dd1">
-                                    <a class="dropdown-item" href="#">Insert</a>
-                                    <a class="dropdown-item" href="#">Update</a>
-                                    <a class="dropdown-item" href="#">Delete</a>
-                                </div>
-                            </div>
+        <td>
+            <div class="dropdown sub-dropdown">
+                <a class="btn-link text-muted dropdown-toggle" data-toggle="dropdown">
+                    <i data-feather="more-horizontal"></i>
+                </a>
 
-                        </td>
-                    </tr>
+                <div class="dropdown-menu dropdown-menu-right">
+                    <!-- Insert -->
+                    <a class="dropdown-item" href="{{ route('customer.create') }}">
+                        Insert
+                    </a>
 
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <th>ល.រ</th>
-                        <th>លេខកូដ</th>
-                        <th>ឈ្មោះអតិថិជន</th>
-                        <th>ភេទ</th>
-                        <th>លេខទូរសព្ទ</th>
-                        <th>អាស័យដ្ខាន</th>
-                        <th>ប្រភេទ</th>
-                        <th>ស្ថានភាព</th>
-                        <th>ឯកសារ</th>
-                        <th></th>
-                    </tr>
-                </tfoot>
+                    <!-- Update -->
+                    <a class="dropdown-item" href="{{ route('customer.edit',$c->id) }}">
+                        Update
+                    </a>
+
+                    <!-- Delete -->
+                    <form action="{{ route('customer.destroy',$c->id) }}" method="POST">
+                        @csrf
+                        @method('DELETE')
+                        <button class="dropdown-item"
+                                onclick="return confirm('តើអ្នកចង់លុបទិន្នន័យនេះមែនទេ?')">
+                            Delete
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </td>
+    </tr>
+    @endforeach
+</tbody>
+                
             </table>
         </div>
 
