@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Customer;
 
 class Notification extends Model
 {
@@ -11,6 +12,12 @@ class Notification extends Model
         'message',
         'type',
         'is_read',
-        'target_user'
+        'target_user',
+        'customer_id'
     ];
+
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class);
+    }
 }

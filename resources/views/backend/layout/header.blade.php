@@ -321,24 +321,31 @@
                     >
                         <img
                             src="{{
-                                asset(
-                                    'backend_assets/assets/images/users/profile-pic.jpg'
-                                )
+                                Auth::user()->image 
+                                ? asset('storage/' . Auth::user()->image) 
+                                : asset('backend_assets/assets/images/users/profile-pic.jpg')
                             }}"
                             alt="user"
                             class="rounded-circle"
                             width="40"
+                            height="40"
+                            style="object-fit: cover"
                         />
                         <span class="ml-2 d-none d-lg-inline-block"
                             ><span>សួរស្តី,</span>
-                            <span class="text-dark">សារីចន្ទពេជ្រ</span>
+                            <span
+                                class="text-dark"
+                                >{{ Auth::user()->name ?? 'User' }}</span
+                            >
                             <i data-feather="chevron-down" class="svg-icon"></i
                         ></span>
                     </a>
                     <div
                         class="dropdown-menu dropdown-menu-right user-dd animated flipInY"
                     >
-                        <a class="dropdown-item" href="javascript:void(0)"
+                        <a
+                            class="dropdown-item"
+                            href="{{ route('profile.edit') }}"
                             ><i
                                 data-feather="user"
                                 class="svg-icon mr-2 ml-1"
@@ -368,17 +375,31 @@
                             Account Setting</a
                         >
                         <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="javascript:void(0)"
+                        <a
+                            class="dropdown-item"
+                            href="#"
+                            onclick="
+                                event.preventDefault();
+                                document.getElementById('logout-form').submit();
+                            "
                             ><i
                                 data-feather="power"
                                 class="svg-icon mr-2 ml-1"
                             ></i>
                             Logout</a
                         >
+                        <form
+                            id="logout-form"
+                            action="{{ route('logout') }}"
+                            method="POST"
+                            class="d-none"
+                        >
+                            @csrf
+                        </form>
                         <div class="dropdown-divider"></div>
                         <div class="pl-4 p-3">
                             <a
-                                href="javascript:void(0)"
+                                href="{{ route('profile.edit') }}"
                                 class="btn btn-sm btn-info"
                                 >View Profile</a
                             >
