@@ -8,9 +8,22 @@ use Illuminate\Http\Request;
 
 class CustomerController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $customers = Customer::latest()->get();
+        $query = Customer::latest();
+
+        if ($request->ajax()) {
+            if ($request->has('search') && $request->search != '') {
+                $search = $request->search;
+                $query->where('name', 'like', "%{$search}%")
+                      ->orWhere('code', 'like', "%{$search}%")
+                      ->orWhere('phone', 'like', "%{$search}%");
+            }
+            $customers = $query->get();
+            return view('backend.customer.partials.table', compact('customers'))->render();
+        }
+
+        $customers = $query->get();
         return view('backend.customer.index', compact('customers'));
     }
     public function create()

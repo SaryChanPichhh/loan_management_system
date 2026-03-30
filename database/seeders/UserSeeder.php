@@ -2,29 +2,62 @@
 
 namespace Database\Seeders;
 
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
-use Faker\Factory as Faker;
+
+use App\Models\User;
+use App\Models\Role;
+use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
+    /**
+     * Run the database seeds.
+     */
     public function run(): void
     {
-        $faker = Faker::create();
-        $data = [];
-        for ($i = 1; $i <= 5; $i++) {
-            $data[] = [
-                'name' => $faker->name(),
-                'email' => $faker->unique()->safeEmail,
-                'email_verified_at' => now(),
-                'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
-                'remember_token' => Str::random(10),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
-        }
+        $staffRole = Role::where('slug', 'staff')->first();
+        $adminRole = Role::where('slug', 'admin')->first();
 
-        DB::table('users')->insert($data);
+        $users = [
+            [
+                'name' => 'Sok Dara',
+                'username' => 'dara.sok',
+                'email' => 'dara@loan.com',
+                'password' => Hash::make('password'),
+                'role' => $staffRole
+            ],
+            [
+                'name' => 'Keo Bopha',
+                'username' => 'bopha.keo',
+                'email' => 'bopha@loan.com',
+                'password' => Hash::make('password'),
+                'role' => $staffRole
+            ],
+            [
+                'name' => 'Chivorn Meng',
+                'username' => 'chivorn.m',
+                'email' => 'chivorn@loan.com',
+                'password' => Hash::make('password'),
+                'role' => $staffRole
+            ],
+            [
+                'name' => 'Vannak Lim',
+                'username' => 'vannak.l',
+                'email' => 'vannak@loan.com',
+                'password' => Hash::make('password'),
+                'role' => $staffRole
+            ]
+        ];
+
+        foreach ($users as $userData) {
+            $role = $userData['role'];
+            unset($userData['role']);
+
+            $user = User::updateOrCreate(['email' => $userData['email']], $userData);
+            if ($role) {
+                $user->roles()->sync([$role->id]);
+            }
+        }
     }
 }

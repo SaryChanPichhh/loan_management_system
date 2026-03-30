@@ -7,6 +7,9 @@
         <div class="d-flex align-items-center justify-content-between ml-4 mr-4 mb-4">
             <h4 class="mb-0 font-weight-bold text-dark">ការជូនដំណឹង (Notifications)</h4>
             <div class="d-flex gap-2">
+                <a href="{{ route('notification.create') }}" class="btn btn-primary rounded-pill shadow-sm px-4 d-flex align-items-center transition-hover mr-2">
+                    <i data-feather="plus" class="mr-2" style="width: 18px; height: 18px;"></i> បង្កើតថ្មី
+                </a>
                 <button class="btn btn-outline-secondary rounded-pill shadow-sm px-4 d-flex align-items-center transition-hover">
                     <i data-feather="check-square" class="mr-2" style="width: 18px; height: 18px;"></i> ធីកថាបានអានទាំងអស់
                 </button>
@@ -60,7 +63,11 @@
                                         
                                         <!-- Footer/Metadata for the notification -->
                                         <div class="d-flex align-items-center gap-2">
-                                            @if($notification->target_user)
+                                            @if($notification->customer)
+                                                <span class="badge badge-light text-secondary border rounded-pill px-3 py-1 font-weight-medium">
+                                                    <i data-feather="user" style="width:12px; height:12px;" class="mr-1"></i> ផ្ញើទៅកាន់អតិថិជន: {{ $notification->customer->name }}
+                                                </span>
+                                            @elseif($notification->target_user)
                                                 <span class="badge badge-light text-secondary border rounded-pill px-3 py-1 font-weight-medium">
                                                     <i data-feather="user" style="width:12px; height:12px;" class="mr-1"></i> ផ្ញើទៅកាន់: {{ $notification->target_user }}
                                                 </span>
@@ -74,11 +81,15 @@
                                         </div>
                                     </div>
                                     
-                                    <!-- Unread Dot Indicator -->
+                                    <!-- Delete Button -->
                                     <div class="ml-3 d-flex align-items-center h-100 mt-2">
-                                        @if(!$notification->is_read)
-                                            <div class="bg-primary rounded-circle shadow-sm" style="width: 12px; height: 12px;" title="មិនទាន់អាន (Unread)"></div>
-                                        @endif
+                                        <form action="{{ route('notification.destroy', $notification->id) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-light text-danger rounded-circle p-2 shadow-sm border" onclick="return confirm('តើអ្នកពិតជាចង់លុបការជូនដំណឹងនេះមែនទេ?')" title="លុប">
+                                                <i data-feather="trash-2" style="width: 14px; height: 14px;"></i>
+                                            </button>
+                                        </form>
                                     </div>
                                     
                                 </div>

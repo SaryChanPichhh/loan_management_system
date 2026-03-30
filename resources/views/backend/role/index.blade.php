@@ -19,114 +19,84 @@
                         </ol>
                     </nav>
                 </div>
-                <div class="col-5 text-right">
-                    <button class="btn btn-primary">
-                        <i data-feather="plus"></i> បង្កើតតួនាទីថ្មី
-                    </button>
-                </div>
             </div>
         </div>
 
         <div class="container-fluid">
+            <!-- User Grid Management -->
             <div class="row">
-
-                <!-- Roles List -->
-                <div class="col-lg-4">
+                <div class="col-12">
                     <div class="card">
                         <div class="card-body">
-                            <h4 class="card-title">បញ្ជីតួនាទី</h4>
-
-                            <ul class="list-group">
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    Admin
-                                    <span class="badge badge-primary">ពេញលេញ</span>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    Manager
-                                    <span class="badge badge-info">មធ្យម</span>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    Staff
-                                    <span class="badge badge-secondary">កម្រិតទាប</span>
-                                </li>
-                            </ul>
+                            <h4 class="card-title">គ្រប់គ្រងសិទ្ធិអ្នកប្រើប្រាស់</h4>
+                            <h6 class="card-subtitle text-muted mb-3">បញ្ជីអ្នកប្រើប្រាស់និងសិទ្ធិរបស់ពួកគេ</h6>
+                            
+                            <div class="table-responsive">
+                                <table id="userTable" class="table table-striped table-bordered no-wrap">
+                                    <thead>
+                                        <tr>
+                                            <th>ឈ្មោះ</th>
+                                            <th>ឈ្មោះអ្នកប្រើ (Username)</th>
+                                            <th>អ៊ីមែល</th>
+                                            <th>តួនាទី</th>
+                                            <th>សិទ្ធិផ្ទាល់ខ្លួន</th>
+                                            <th>សកម្មភាព</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($users as $user)
+                                            <tr>
+                                                <td>{{ $user->name }}</td>
+                                                <td><span class="badge bg-info text-dark">{{ $user->username }}</span></td>
+                                                <td>{{ $user->email }}</td>
+                                                <td>
+                                                    @foreach($user->roles as $role)
+                                                        <span class="badge bg-primary">{{ $role->name }}</span>
+                                                    @endforeach
+                                                </td>
+                                                <td>
+                                                    <span class="badge rounded-pill bg-secondary text-white">{{ $user->permissions->count() }} សិទ្ធិ</span>
+                                                </td>
+                                                <td>
+                                                    <a href="{{ route('user.permissions.edit', $user->id) }}" class="btn btn-sm btn-primary">
+                                                        <i data-feather="edit-2" class="feather-sm"></i> កំណត់សិទ្ធិ
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Permissions -->
-                <div class="col-lg-8">
-                    <div class="card">
-                        <div class="card-body">
-                            <h4 class="card-title">កំណត់សិទ្ធិ (Permissions)</h4>
-                            <p class="text-muted">
-                                ជ្រើសរើសសិទ្ធិសម្រាប់តួនាទី <strong>Admin</strong>
-                            </p>
-
-                            <form id="permissionForm">
-                                <div class="row">
-
-                                    <div class="col-md-6">
-                                        <h5>Loan Management</h5>
-                                        <div class="custom-control custom-checkbox">
-                                            <input type="checkbox" class="custom-control-input" id="loan_view" checked>
-                                            <label class="custom-control-label" for="loan_view">មើលកម្ចី</label>
-                                        </div>
-                                        <div class="custom-control custom-checkbox">
-                                            <input type="checkbox" class="custom-control-input" id="loan_create" checked>
-                                            <label class="custom-control-label" for="loan_create">បង្កើតកម្ចី</label>
-                                        </div>
-                                        <div class="custom-control custom-checkbox">
-                                            <input type="checkbox" class="custom-control-input" id="loan_approve" checked>
-                                            <label class="custom-control-label" for="loan_approve">អនុម័តកម្ចី</label>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <h5>User Management</h5>
-                                        <div class="custom-control custom-checkbox">
-                                            <input type="checkbox" class="custom-control-input" id="user_view" checked>
-                                            <label class="custom-control-label" for="user_view">មើលអ្នកប្រើប្រាស់</label>
-                                        </div>
-                                        <div class="custom-control custom-checkbox">
-                                            <input type="checkbox" class="custom-control-input" id="user_create" checked>
-                                            <label class="custom-control-label" for="user_create">បង្កើតអ្នកប្រើប្រាស់</label>
-                                        </div>
-                                        <div class="custom-control custom-checkbox">
-                                            <input type="checkbox" class="custom-control-input" id="user_delete" checked>
-                                            <label class="custom-control-label" for="user_delete">លុបអ្នកប្រើប្រាស់</label>
-                                        </div>
-                                    </div>
-
-                                </div>
-
-                                <hr>
-
-                                <button type="submit" class="btn btn-success">
-                                    <i data-feather="save"></i> រក្សាទុកសិទ្ធិ
-                                </button>
-                            </form>
-
-                        </div>
-                    </div>
-                </div>
-
             </div>
         </div>
     </div>
+
 @endsection
 
 @push('scripts')
     <script>
         $(document).ready(function () {
             $(".preloader").fadeOut();
+            if (window.feather) window.feather.replace();
 
-            $("#permissionForm").on("submit", function (e) {
-                e.preventDefault();
-                alert("សិទ្ធិត្រូវបានរក្សាទុកជោគជ័យ!");
+            // DataTable Initialization
+            $("#userTable").DataTable({
+                "pageLength": 10,
+                "language": {
+                    "search": "ស្វែងរក:",
+                    "lengthMenu": "បង្ហាញ _MENU_ ជួរ",
+                    "info": "បង្ហាញពី _START_ ដល់ _END_ នៃ _TOTAL_ ជួរ",
+                    "paginate": {
+                        "first": "ដំបូង",
+                        "last": "ចុងក្រោយ",
+                        "next": "បន្ទាប់",
+                        "previous": "មុន"
+                    }
+                }
             });
-
-            if (feather) feather.replace();
         });
     </script>
 @endpush
