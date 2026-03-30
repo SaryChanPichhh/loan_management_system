@@ -41,6 +41,15 @@
                         ><span class="hide-menu">អតិថិជន</span></a
                     >
                 </li>
+                <li class="sidebar-item">
+                    <a
+                        class="sidebar-link sidebar-link"
+                        href="{{ route('guarantors.index') }}"
+                        aria-expanded="false"
+                    ><i data-feather="user-check" class="feather-icon"></i
+                        ><span class="hide-menu">អ្នកធានា</span></a
+                    >
+                </li>
                 <li class="nav-small-cap">
                     <span class="hide-menu">មុខងារគ្រប់គ្រង</span>
                 </li>
@@ -58,6 +67,17 @@
                         aria-expanded="false"
                         class="collapse first-level base-level-line"
                     >
+                        <li class="sidebar-item">
+                            <a
+                                class="sidebar-link sidebar-link"
+                                href="{{ route('loan_applications.index') }}"
+                                aria-expanded="false"
+                            >
+                                <i data-feather="file-text" class="feather-icon">
+                                </i>
+                                <span class="hide-menu">សំណើសុំកម្ចី</span>
+                            </a>
+                        </li>
                         <li class="sidebar-item">
                             <a
                                 class="sidebar-link sidebar-link"
@@ -96,9 +116,21 @@
                                 <span class="hide-menu">កម្ចីមិនទាន់សង</span>
                             </a>
                         </li>
+
                     </ul>
                 </li>
-                {{--                Repayment --}}
+                
+                <li class="sidebar-item">
+                    <a
+                        class="sidebar-link sidebar-link"
+                        href="{{ route('loan_products.index') }}"
+                        aria-expanded="false"
+                    >
+                        <i data-feather="package" class="feather-icon"></i>
+                        <span class="hide-menu">Products កម្ចី</span>
+                    </a>
+                </li>
+                {{-- Repayment --}}
                 <li class="sidebar-item">
                     <a
                         class="sidebar-link has-arrow"
@@ -139,7 +171,7 @@
                         </li>
                     </ul>
                 </li>
-{{--            Activity log--}}
+                {{-- Activity log--}}
                 <li class="sidebar-item">
                     <a
                         class="sidebar-link sidebar-link"

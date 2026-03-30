@@ -10,6 +10,9 @@ use App\Http\Controllers\Backend\NotificationController;
 use App\Http\Controllers\Backend\RoleController;
 use App\Http\Controllers\Backend\ActivityLogController;
 use App\Http\Controllers\Backend\SettingController;
+use App\Http\Controllers\Backend\LoanProductController;
+use App\Http\Controllers\Backend\GuarantorController;
+use App\Http\Controllers\Backend\LoanApplicationController;
 use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 
@@ -57,10 +60,18 @@ Route::controller(CustomerController::class)->group(function () {
 Route::controller(LoanController::class)->group(function () {
     Route::get('/loans', 'index')->name('loans.index');
     Route::get('/loans/create', 'create')->name('loans.create');
+    Route::post('/loans', 'store')->name('loans.store');
     Route::get('/loans/defaulted', 'defaulted')->name('loans.defaulted');
+    Route::get('/loans/customer-eligibility', 'checkCustomerEligibility')->name('loans.customer_eligibility');
     Route::get('/loans/{id}', 'show')->name('loans.show');
     Route::get('/loans/edit/{id}', 'edit')->name('loans.edit');
+    Route::put('/loans/{id}', 'update')->name('loans.update');
+    Route::delete('/loans/{id}', 'destroy')->name('loans.destroy');
+    Route::post('/loans/{id}/submit-review', 'submitForReview')->name('loans.submit_review');
     Route::get('/loans/review/{id}', 'review')->name('loans.review');
+    Route::post('/loans/{id}/approve', 'approve')->name('loans.approve');
+    Route::post('/loans/{id}/reject', 'reject')->name('loans.reject');
+    Route::post('/loans/{id}/disburse', 'disburse')->name('loans.disburse');
     Route::get('/loans/payments/{id}', 'payments')->name('loans.payments');
 });
 
@@ -127,4 +138,51 @@ Route::controller(SettingController::class)->group(function () {
     Route::get('/settings/exchange-rate/edit/{id}', 'exchange_rate_edit')->name('settings.exchange_rate.edit');
     Route::put('/settings/exchange-rate/update/{id}', 'exchange_rate_update')->name('settings.exchange_rate.update');
     Route::delete('/settings/exchange-rate/delete/{id}', 'exchange_rate_delete')->name('settings.exchange_rate.delete');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Loan Products
+|--------------------------------------------------------------------------
+*/
+Route::controller(LoanProductController::class)->group(function () {
+    Route::get('/loan-products', 'index')->name('loan_products.index');
+    Route::get('/loan-products/create', 'create')->name('loan_products.create');
+    Route::post('/loan-products', 'store')->name('loan_products.store');
+    Route::get('/loan-products/{loanProduct}', 'show')->name('loan_products.show');
+    Route::get('/loan-products/edit/{loanProduct}', 'edit')->name('loan_products.edit');
+    Route::put('/loan-products/{loanProduct}', 'update')->name('loan_products.update');
+    Route::delete('/loan-products/{loanProduct}', 'destroy')->name('loan_products.destroy');
+    Route::post('/loan-products/{loanProduct}/toggle-status', 'toggleStatus')->name('loan_products.toggle_status');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Guarantors
+|--------------------------------------------------------------------------
+*/
+Route::controller(GuarantorController::class)->group(function () {
+    Route::get('/guarantors', 'index')->name('guarantors.index');
+    Route::get('/guarantors/create', 'create')->name('guarantors.create');
+    Route::post('/guarantors', 'store')->name('guarantors.store');
+    Route::get('/guarantors/{id}', 'show')->name('guarantors.show');
+    Route::get('/guarantors/edit/{id}', 'edit')->name('guarantors.edit');
+    Route::put('/guarantors/{id}', 'update')->name('guarantors.update');
+    Route::delete('/guarantors/{id}', 'destroy')->name('guarantors.destroy');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Loan Applications
+|--------------------------------------------------------------------------
+*/
+Route::controller(LoanApplicationController::class)->group(function () {
+    Route::get('/loan-applications', 'index')->name('loan_applications.index');
+    Route::get('/loan-applications/create', 'create')->name('loan_applications.create');
+    Route::post('/loan-applications', 'store')->name('loan_applications.store');
+    Route::get('/loan-applications/{id}', 'show')->name('loan_applications.show');
+    Route::get('/loan-applications/edit/{id}', 'edit')->name('loan_applications.edit');
+    Route::put('/loan-applications/{id}', 'update')->name('loan_applications.update');
+    Route::delete('/loan-applications/{id}', 'destroy')->name('loan_applications.destroy');
+    Route::post('/loan-applications/{id}/status', 'updateStatus')->name('loan_applications.update_status');
 });

@@ -3,27 +3,39 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\Repayment;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Faker\Factory as Faker;
 
 class RepaymentSeeder extends Seeder
 {
     public function run(): void
     {
-        $methods = ['Cash', 'ABA Bank', 'Wing', 'Acleda'];
-        $statuses = ['Paid', 'Pending', 'Failed'];
-        
-        for ($i = 1; $i <= 20; $i++) {
-            Repayment::create([
-                'loan_reference' => 'LN-' . str_pad(rand(1, 9999), 5, '0', STR_PAD_LEFT),
-                'customer_name' => fake()->name(),
-                'amount' => fake()->randomFloat(2, 50, 1500),
-                'payment_date' => fake()->dateTimeBetween('-2 months', 'now'),
-                'payment_method' => $methods[array_rand($methods)],
-                'reference_number' => 'REF-' . strtoupper(fake()->lexify('????')) . '-' . fake()->numerify('####'),
-                'points' => fake()->numberBetween(0, 50),
-                'status' => $statuses[array_rand($statuses)],
-                'notes' => fake()->optional()->sentence()
-            ]);
+        $faker = Faker::create();
+        $data = [];
+        for ($i = 1; $i <= 5; $i++) {
+            $data[] = [
+                'amount' => $faker->randomFloat(2, 100, 1000),
+                'payment_date' => $faker->date('Y-m-d'),
+                'payment_method' => $faker->randomElement(['Cash', 'Bank Transfer']),
+                'reference_number' => $faker->isbn10(),
+                'status' => 'completed',
+                'notes' => $faker->sentence(),
+                'loan_id' => $faker->numberBetween(1, 5),
+                'schedule_id' => $faker->numberBetween(1, 5),
+                'principal_paid' => $faker->randomFloat(2, 50, 800),
+                'interest_paid' => $faker->randomFloat(2, 10, 200),
+                'penalty_paid' => 0,
+                'late_fee_paid' => 0,
+                'late_fee_applied' => 0,
+                'is_early_settlement' => 0,
+                'received_by' => 1,
+                'waived_by' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
         }
+
+        DB::table('repayments')->insert($data);
     }
 }
