@@ -24,19 +24,20 @@ class LoanApplicationSeeder extends Seeder
 
         $data = [];
         for ($i = 0; $i < 5; $i++) {
-            $status = $statuses[$i];
+            $status = $statuses[$i % count($statuses)];
+
             $data[] = [
                 'application_code' => 'APP-' . date('Ym') . '-' . str_pad($i + 1, 4, '0', STR_PAD_LEFT),
                 'customer_id' => $customers[array_rand($customers)],
                 'product_id' => $products[array_rand($products)],
                 'requested_amount' => rand(1000, 5000),
                 'requested_months' => rand(6, 24),
-                'purpose' => $purposes[$i],
+                'purpose' => $purposes[$i % count($purposes)],
                 'status' => $status,
                 'reviewed_by' => in_array($status, ['approved', 'rejected']) ? $userId : null,
                 'reviewed_at' => in_array($status, ['approved', 'rejected']) ? now() : null,
                 'rejection_reason' => $status === 'rejected' ? 'មិនគ្រប់លក្ខខណ្ឌ' : null,
-                'loan_id' => null, // Typically set when approved, but we leave null for seeder simplicity
+                'loan_id' => null,
                 'created_by' => $userId,
                 'created_at' => now(),
                 'updated_at' => now(),
