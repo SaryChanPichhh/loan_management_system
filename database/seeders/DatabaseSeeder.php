@@ -29,6 +29,9 @@ class DatabaseSeeder extends Seeder
             }
 
             $this->call([
+                // Role & Permission (PK/FK) should seed early so auth IDs exist for other seeders that may rely on them.
+                RolePermissionSeeder::class,
+
                 CustomerSeeder::class,
                 ExchangeRateSeeder::class,
                 ActivityLogSeeder::class,
@@ -54,7 +57,6 @@ class DatabaseSeeder extends Seeder
             ]);
 
             DB::commit();
-
         } catch (\Throwable $e) {
             DB::rollBack();
 
