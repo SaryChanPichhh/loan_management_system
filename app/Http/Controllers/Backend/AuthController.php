@@ -21,7 +21,14 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        if (auth()->attempt($credentials)) {
+        $remember = $request->has('remember');
+
+        if (auth()->attempt($credentials, $remember)) {
+            if ($remember) {
+                \Illuminate\Support\Facades\Cookie::queue('remember_username', $request->username, 60 * 24 * 30); // 30 days
+            } else {
+                \Illuminate\Support\Facades\Cookie::queue(\Illuminate\Support\Facades\Cookie::forget('remember_username'));
+            }
             $request->session()->regenerate();
             return redirect()->route('dashboard.index');
         }

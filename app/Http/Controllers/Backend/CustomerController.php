@@ -17,7 +17,9 @@ class CustomerController extends Controller
                 $search = $request->search;
                 $query->where('name', 'like', "%{$search}%")
                       ->orWhere('code', 'like', "%{$search}%")
-                      ->orWhere('phone', 'like', "%{$search}%");
+                      ->orWhere('phone', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%")
+                      ->orWhere('national_id', 'like', "%{$search}%");
             }
             $customers = $query->get();
             return view('backend.customer.partials.table', compact('customers'))->render();
@@ -32,27 +34,19 @@ class CustomerController extends Controller
     }
     public function store(Request $request)
     {
-        $request->validate([
-            'code' => 'required|unique:customers,code',
-            'name' => 'required|max:255',
-            'gender' => 'required',
-            'phone' => 'required|digits_between:8,15',
-            'address' => 'nullable|max:255',
-            'type' => 'required',
-            'status' => 'required|boolean',
-            'document' => 'nullable|file|mimes:pdf,jpg,png|max:2048'
-        ]);
+        $validated = $request->validate(Customer::validationRules());
 
         $fileName = null;
 
-        if ($request->hasFile('document')) {
-            $fileName = time() . '.' . $request->document->extension();
-            $request->document->move(public_path('uploads'), $fileName);
+        if ($request->hasFile('document_path')) {
+            $fileName = time() . '.' . $request->document_path->extension();
+            $request->document_path->move(public_path('uploads'), $fileName);
         }
 
         Customer::create([
-            ...$request->all(),
-            'document' => $fileName
+            ...$validated,
+            'document_path' => $fileName,
+            'created_by' => auth()->id(),
         ]);
 
         return redirect()->route('customer.index')->with('success', 'Created successfully');
@@ -71,24 +65,15 @@ class CustomerController extends Controller
 
     public function update(Request $request, Customer $customer)
     {
-        $request->validate([
-            'code' => 'required|unique:customers,code,' . $customer->id,
-            'name' => 'required|max:255',
-            'gender' => 'required',
-            'phone' => 'required|digits_between:8,15',
-            'address' => 'nullable|max:255',
-            'type' => 'required',
-            'status' => 'required|boolean',
-            'document' => 'nullable|file|mimes:pdf,jpg,png|max:2048'
-        ]);
+        $validated = $request->validate(Customer::validationRules($customer->id));
 
-        if ($request->hasFile('document')) {
-            $fileName = time() . '.' . $request->document->extension();
-            $request->document->move(public_path('uploads'), $fileName);
-            $customer->document = $fileName;
+        if ($request->hasFile('document_path')) {
+            $fileName = time() . '.' . $request->document_path->extension();
+            $request->document_path->move(public_path('uploads'), $fileName);
+            $customer->document_path = $fileName;
         }
 
-        $customer->update($request->except('document'));
+        $customer->update($validated);
 
         return redirect()->route('customer.index')->with('success', 'Updated successfully');
     }

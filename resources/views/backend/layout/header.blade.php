@@ -1,6 +1,6 @@
 <header class="topbar" data-navbarbg="skin6">
     <nav class="navbar top-navbar navbar-expand-md">
-        <div class="navbar-header" data-logobg="skin6">
+        <div class="navbar-header p-0 m-0" data-logobg="skin6">
             <!-- This is for the sidebar toggle which is visible on mobile only -->
             <a
                 class="nav-toggler waves-effect waves-light d-block d-md-none"
@@ -13,52 +13,20 @@
             <div class="navbar-brand">
                 <!-- Logo icon -->
                 <a href="{{ route('dashboard.index') }}">
-                    <b class="logo-icon">
+                    <b class="">
                         <!-- Dark Logo icon -->
                         <img
+                            style="width: 230px; padding: 0"
                             src="{{
                                 asset(
-                                    'backend_assets/assets/images/logo-icon.png'
+                                    'backend_assets/assets/images/company_logo.png'
                                 )
                             }}"
                             alt="homepage"
                             class="dark-logo"
                         />
                         <!-- Light Logo icon -->
-                        <img
-                            src="{{
-                                asset(
-                                    'backend_assets/assets/images/logo-icon.png'
-                                )
-                            }}"
-                            alt="homepage"
-                            class="light-logo"
-                        />
                     </b>
-                    <!--End Logo icon -->
-                    <!-- Logo text -->
-                    <span class="logo-text">
-                        <!-- dark Logo text -->
-                        <img
-                            src="{{
-                                asset(
-                                    'backend_assets/assets/images/logo-text.png'
-                                )
-                            }}"
-                            alt="homepage"
-                            class="dark-logo"
-                        />
-                        <!-- Light Logo text -->
-                        <img
-                            src="{{
-                                asset(
-                                    'backend_assets/assets/images/logo-light-text.png'
-                                )
-                            }}"
-                            class="light-logo"
-                            alt="homepage"
-                        />
-                    </span>
                 </a>
             </div>
             <!-- ============================================================== -->
@@ -87,6 +55,10 @@
             <!-- ============================================================== -->
             <ul class="navbar-nav float-left mr-auto ml-3 pl-1">
                 <!-- Notification -->
+                @php
+                    $notifications = \App\Models\Notification::latest()->take(5)->get();
+                    $unreadCount = \App\Models\Notification::where('is_read', false)->count();
+                @endphp
                 <li class="nav-item dropdown">
                     <a
                         class="nav-link dropdown-toggle pl-md-3 position-relative"
@@ -97,146 +69,38 @@
                         aria-haspopup="true"
                         aria-expanded="false"
                     >
-                        <span
-                            ><i data-feather="bell" class="svg-icon"></i
-                        ></span>
-                        <span
-                            class="badge badge-primary notify-no rounded-circle"
-                            >5</span
-                        >
+                        <span><i data-feather="bell" class="svg-icon"></i></span>
+                        @if($unreadCount > 0)
+                            <span class="badge badge-primary notify-no rounded-circle">{{ $unreadCount }}</span>
+                        @endif
                     </a>
-                    <div
-                        class="dropdown-menu dropdown-menu-left mailbox animated bounceInDown"
-                    >
+                    <div class="dropdown-menu dropdown-menu-left mailbox animated bounceInDown" style="width: 300px;">
                         <ul class="list-style-none">
                             <li>
-                                <div
-                                    class="message-center notifications position-relative"
-                                >
+                                <div class="message-center notifications position-relative">
+                                    @forelse($notifications as $notif)
                                     <!-- Message -->
-                                    <a
-                                        href="javascript:void(0)"
-                                        class="message-item d-flex align-items-center border-bottom px-3 py-2"
-                                    >
-                                        <div
-                                            class="btn btn-danger rounded-circle btn-circle"
-                                        >
-                                            <i
-                                                data-feather="airplay"
-                                                class="text-white"
-                                            ></i>
+                                    <a href="{{ route('notification.index') }}" class="message-item d-flex align-items-center border-bottom px-3 py-2">
+                                        <div class="btn {{ $notif->type == 'warning' ? 'btn-warning' : 'btn-primary' }} rounded-circle btn-circle">
+                                            <i data-feather="{{ $notif->type == 'warning' ? 'alert-triangle' : 'bell' }}" class="text-white" style="width: 14px;"></i>
                                         </div>
-                                        <div
-                                            class="w-75 d-inline-block v-middle pl-2"
-                                        >
-                                            <h6 class="message-title mb-0 mt-1">
-                                                Luanch Admin
-                                            </h6>
-                                            <span
-                                                class="font-12 text-nowrap d-block text-muted"
-                                                >Just see the my new
-                                                admin!</span
-                                            >
-                                            <span
-                                                class="font-12 text-nowrap d-block text-muted"
-                                                >9:30 AM</span
-                                            >
+                                        <div class="w-75 d-inline-block v-middle pl-2">
+                                            <h6 class="message-title mb-0 mt-1" style="font-size: 0.85rem;">{{ $notif->title }}</h6>
+                                            <span class="font-12 d-block text-muted text-truncate">{{ $notif->message }}</span>
+                                            <span class="font-10 text-nowrap d-block text-muted">{{ $notif->created_at->diffForHumans() }}</span>
                                         </div>
                                     </a>
-                                    <!-- Message -->
-                                    <a
-                                        href="javascript:void(0)"
-                                        class="message-item d-flex align-items-center border-bottom px-3 py-2"
-                                    >
-                                        <span
-                                            class="btn btn-success text-white rounded-circle btn-circle"
-                                            ><i
-                                                data-feather="calendar"
-                                                class="text-white"
-                                            ></i
-                                        ></span>
-                                        <div
-                                            class="w-75 d-inline-block v-middle pl-2"
-                                        >
-                                            <h6 class="message-title mb-0 mt-1">
-                                                Event today
-                                            </h6>
-                                            <span
-                                                class="font-12 text-nowrap d-block text-muted text-truncate"
-                                                >Just a reminder that you have
-                                                event</span
-                                            >
-                                            <span
-                                                class="font-12 text-nowrap d-block text-muted"
-                                                >9:10 AM</span
-                                            >
-                                        </div>
-                                    </a>
-                                    <!-- Message -->
-                                    <a
-                                        href="javascript:void(0)"
-                                        class="message-item d-flex align-items-center border-bottom px-3 py-2"
-                                    >
-                                        <span
-                                            class="btn btn-info rounded-circle btn-circle"
-                                            ><i
-                                                data-feather="settings"
-                                                class="text-white"
-                                            ></i
-                                        ></span>
-                                        <div
-                                            class="w-75 d-inline-block v-middle pl-2"
-                                        >
-                                            <h6 class="message-title mb-0 mt-1">
-                                                Settings
-                                            </h6>
-                                            <span
-                                                class="font-12 text-nowrap d-block text-muted text-truncate"
-                                                >You can customize this template
-                                                as you want</span
-                                            >
-                                            <span
-                                                class="font-12 text-nowrap d-block text-muted"
-                                                >9:08 AM</span
-                                            >
-                                        </div>
-                                    </a>
-                                    <!-- Message -->
-                                    <a
-                                        href="javascript:void(0)"
-                                        class="message-item d-flex align-items-center border-bottom px-3 py-2"
-                                    >
-                                        <span
-                                            class="btn btn-primary rounded-circle btn-circle"
-                                            ><i
-                                                data-feather="box"
-                                                class="text-white"
-                                            ></i
-                                        ></span>
-                                        <div
-                                            class="w-75 d-inline-block v-middle pl-2"
-                                        >
-                                            <h6 class="message-title mb-0 mt-1">
-                                                Pavan kumar
-                                            </h6>
-                                            <span
-                                                class="font-12 text-nowrap d-block text-muted"
-                                                >Just see the my admin!</span
-                                            >
-                                            <span
-                                                class="font-12 text-nowrap d-block text-muted"
-                                                >9:02 AM</span
-                                            >
-                                        </div>
-                                    </a>
+                                    @empty
+                                    <div class="p-3 text-center text-muted">
+                                        <i data-feather="smile" class="mb-2"></i>
+                                        <p class="small mb-0">មិនមានការជូនដំណឹងថ្មីទេ (No new notifications)</p>
+                                    </div>
+                                    @endforelse
                                 </div>
                             </li>
                             <li>
-                                <a
-                                    class="nav-link pt-3 text-center text-dark"
-                                    href="javascript:void(0);"
-                                >
-                                    <strong>Check all notifications</strong>
+                                <a class="nav-link pt-3 text-center text-dark" href="{{ route('notification.index') }}">
+                                    <strong>មើលទាំងអស់ (View all)</strong>
                                     <i class="fa fa-angle-right"></i>
                                 </a>
                             </li>
@@ -376,18 +240,17 @@
                         >
                         <div class="dropdown-divider"></div>
                         <a
-                            class="dropdown-item"
-                            href="#"
-                            onclick="
-                                event.preventDefault();
-                                document.getElementById('logout-form').submit();
-                            "
-                            ><i
-                                data-feather="power"
-                                class="svg-icon mr-2 ml-1"
-                            ></i>
-                            Logout</a
+                            class="dropdown-item d-flex align-items-center"
+                            href="javascript:void(0)"
+                            onclick="confirmLogout()"
                         >
+                            <i
+                                data-feather="power"
+                                class="svg-icon mr-2 ml-1 text-danger"
+                                style="width: 18px;"
+                            ></i>
+                            <span class="font-weight-medium">ចាកចេញ (Logout)</span>
+                        </a>
                         <form
                             id="logout-form"
                             action="{{ route('logout') }}"

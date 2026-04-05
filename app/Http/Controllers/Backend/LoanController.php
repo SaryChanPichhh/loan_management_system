@@ -298,8 +298,13 @@ class LoanController extends Controller
             : collect();
 
         return view('backend.loans.show', compact(
-            'loan', 'monthlyInstalment', 'totalInterest',
-            'totalPayable', 'totalPaid', 'remainingBalance', 'guarantors'
+            'loan',
+            'monthlyInstalment',
+            'totalInterest',
+            'totalPayable',
+            'totalPaid',
+            'remainingBalance',
+            'guarantors'
         ));
     }
 
@@ -417,8 +422,15 @@ class LoanController extends Controller
         $allChecksPassed = !in_array(false, $checks, true);
 
         return view('backend.loans.review', compact(
-            'loan', 'customer', 'product', 'guarantors', 'checks',
-            'requiresGuarantor', 'activeGuarantor', 'pastLoans', 'allChecksPassed'
+            'loan',
+            'customer',
+            'product',
+            'guarantors',
+            'checks',
+            'requiresGuarantor',
+            'activeGuarantor',
+            'pastLoans',
+            'allChecksPassed'
         ));
     }
 
@@ -484,7 +496,7 @@ class LoanController extends Controller
     public function disburse($id)
     {
         $loan = Loan::with(['product', 'customer'])->findOrFail($id);
-        
+
         if ($loan->status !== 'approved') {
             return redirect()->back()->with('error', 'មានតែកម្ចីដែលបានអនុម័តរួច ទើបអាចបើកប្រាក់បាន! (approved only)');
         }
@@ -496,6 +508,36 @@ class LoanController extends Controller
             $loan->update([
                 'status' => 'active',
             ]);
+
+            // --- 📊 AUTOMATED ACCOUNTING (DISBURSEMENT JOURNAL ENTRY) ---
+            $coaCash = \App\Models\ChartOfAccount::where('code', '1000')->first();
+            $coaPrincipal = \App\Models\ChartOfAccount::where('code', '1100')->first();
+
+            $journalEntry = \App\Models\JournalEntry::create([
+                'entry_date' => now(), // Disbursement date
+                'reference_type' => 'LoanDisbursement',
+                'reference_id' => $loan->id,
+                'description' => "Loan Disbursement - " . $loan->loan_code . " (Customer: " . ($loan->customer->name ?? 'Unknown') . ")",
+                'total_amount' => $loan->principal_amount,
+                'created_by' => Auth::id(),
+            ]);
+
+            // Debit Principal Receivable (Increase Asset)
+            \App\Models\JournalItem::create([
+                'journal_entry_id' => $journalEntry->id,
+                'chart_of_account_id' => $coaPrincipal->id,
+                'type' => 'Debit',
+                'amount' => $loan->principal_amount,
+            ]);
+
+            // Credit Cash (Decrease Asset)
+            \App\Models\JournalItem::create([
+                'journal_entry_id' => $journalEntry->id,
+                'chart_of_account_id' => $coaCash->id,
+                'type' => 'Credit',
+                'amount' => $loan->principal_amount,
+            ]);
+            // -------------------------------------------------------------
 
             // Generate loan schedules
             $this->generateSchedule($loan, $startDate);
@@ -574,7 +616,11 @@ class LoanController extends Controller
             ->count();
 
         return view('backend.loans.payments', compact(
-            'loan', 'totalPaid', 'remainingBalance', 'overdueCount', 'totalPayable'
+            'loan',
+            'totalPaid',
+            'remainingBalance',
+            'overdueCount',
+            'totalPayable'
         ));
     }
 
@@ -604,6 +650,93 @@ class LoanController extends Controller
             });
 
         return view('backend.loans.defaulted', compact('defaultedLoans'));
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // CALENDAR
+    // ─────────────────────────────────────────────────────────────────
+
+    public function calendar()
+    {
+        // Get today's payments
+        $today = Carbon::today();
+        $todayPayments = LoanSchedule::with(['loan.customer'])
+            ->whereDate('due_date', $today)
+            ->orderBy('loan_id')
+            ->get();
+
+        // Get calendar events for the next 3 months
+        $startDate = Carbon::now()->startOfMonth();
+        $endDate = Carbon::now()->addMonths(3)->endOfMonth();
+
+        $calendarEvents = [];
+
+        // Group payments by date
+        $paymentsByDate = LoanSchedule::selectRaw('DATE(due_date) as payment_date, COUNT(*) as payment_count, SUM(amount_due) as total_amount, SUM(amount_paid) as paid_amount')
+            ->whereBetween('due_date', [$startDate, $endDate])
+            ->groupBy('payment_date')
+            ->orderBy('payment_date')
+            ->get();
+
+        foreach ($paymentsByDate as $paymentGroup) {
+            $date = $paymentGroup->payment_date;
+            $count = $paymentGroup->payment_count;
+            $totalAmount = $paymentGroup->total_amount;
+            $paidAmount = $paymentGroup->paid_amount;
+
+            // Determine color based on payment status
+            $unpaidAmount = $totalAmount - $paidAmount;
+            if ($unpaidAmount == 0) {
+                $color = '#28a745'; // Green - all paid
+            } elseif ($paidAmount > 0) {
+                $color = '#ffc107'; // Yellow - partial payment
+            } else {
+                $color = '#dc3545'; // Red - no payment
+            }
+
+            $calendarEvents[] = [
+                'title' => $count . ' payments',
+                'date' => $date,
+                'count' => $count,
+                'total_amount' => $totalAmount,
+                'paid_amount' => $paidAmount,
+                'color' => $color,
+            ];
+        }
+
+        return view('backend.loans.calendar', compact('todayPayments', 'calendarEvents'));
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // REPAYMENTS DUE TODAY
+    // ─────────────────────────────────────────────────────────────────
+
+    public function repaymentsDueToday(Request $request)
+    {
+        $today = Carbon::today()->toDateString();
+        $query = LoanSchedule::whereDate('due_date', $today)
+            ->where('status', '!=', 'paid')
+            ->with(['loan.customer', 'loan.product']);
+
+        if ($request->ajax()) {
+            if ($request->has('search') && $request->search != '') {
+                $search = $request->search;
+                $query->whereHas('loan.customer', function($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('code', 'like', "%{$search}%");
+                })->orWhereHas('loan', function($q) use ($search) {
+                    $q->where('loan_code', 'like', "%{$search}%");
+                });
+                
+                // Re-enforce today's date and unpaid status after nested orWhere
+                $query->whereDate('due_date', $today)->where('status', '!=', 'paid');
+            }
+            $schedules = $query->get();
+            return view('backend.loans.partials.repayments_table', compact('schedules'))->render();
+        }
+
+        $schedules = $query->get();
+        return view('backend.loans.repayments_due_today', compact('schedules'));
     }
 
     // ─────────────────────────────────────────────────────────────────
@@ -675,7 +808,7 @@ class LoanController extends Controller
         }
         return round(
             ($loan->principal_amount * $rate * pow(1 + $rate, $loan->duration_months))
-            / (pow(1 + $rate, $loan->duration_months) - 1),
+                / (pow(1 + $rate, $loan->duration_months) - 1),
             2
         );
     }

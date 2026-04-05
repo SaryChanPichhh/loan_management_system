@@ -53,11 +53,39 @@
         asset('backend_assets/assets/libs/morris.js/morris.min.js')
     }}"></script>
 
+<!-- SweetAlert2 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+
 <script>
     // Ensure preloader is hidden after page load
     $(document).ready(function () {
         $(".preloader").fadeOut();
     });
+
+    // Handle Logout Confirmation
+    function confirmLogout() {
+        Swal.fire({
+            title: 'ចាកចេញពីប្រព័ន្ធ?', // Logout?
+            text: "តើអ្នកប្រាកដជាចង់ចាកចេញមែនទេ?", // Are you sure you want to logout?
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#5f76e8', // Primary color match
+            cancelButtonColor: '#ff4f70', // Danger color
+            confirmButtonText: 'បាទ/ចាស, ចាកចេញ (Yes, Logout)',
+            cancelButtonText: 'បោះបង់ (Cancel)',
+            background: '#fff',
+            borderRadius: '1.25rem',
+            customClass: {
+                title: 'font-weight-bold text-dark',
+                popup: 'rounded-xl shadow-lg border-0'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('logout-form').submit();
+            }
+        });
+    }
 
     // Fallback in case jQuery isn't ready
     window.addEventListener("load", function () {

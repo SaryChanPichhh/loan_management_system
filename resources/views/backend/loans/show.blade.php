@@ -1,6 +1,7 @@
 @extends('backend.layout.master')
 @push('styles')
     <link href="{{ asset('backend_assets/assets/extra-libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css') }}" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet" />
 @endpush
 
 @section('contents')
@@ -352,6 +353,21 @@
             </div>
         </div>
         @endif
+        {{-- Payment Schedule as like calendar --}}
+        @if($loan->schedules->count() > 0)
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header py-2">
+                        <h5 class="mb-0">កាលវិភាគទូទាត់ជាប្រតិទិន (Payment Schedule Calendar)</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="payment-calendar"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
 
     </div>
 </div>
@@ -360,6 +376,7 @@
 @push('scripts')
     <script src="{{ asset('backend_assets/assets/extra-libs/datatables.net/js/jquery.dataTables.min.js') }}"></script>
     <script src="{{ asset('backend_assets/assets/extra-libs/datatables.net-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
     <script>
     $(document).ready(function() {
         "use strict";
@@ -376,6 +393,57 @@
                 });
             } catch (e) { console.error(e); }
         }
+
+        // Payment Schedule Calendar
+        @if($loan->schedules->count() > 0)
+        var calendarEl = document.getElementById('payment-calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            },
+            events: [
+                @foreach($loan->schedules as $schedule)
+                {
+                    title: '${{ number_format($schedule->amount_due, 2) }}',
+                    start: '{{ $schedule->due_date }}',
+                    @php
+                        $eventColor = match($schedule->status) {
+                            'paid' => '#28a745', // green
+                            default => \Carbon\Carbon::parse($schedule->due_date)->lt(now()) ? '#dc3545' : '#ffc107' // red if overdue, yellow if pending
+                        };
+                    @endphp
+                    backgroundColor: '{{ $eventColor }}',
+                    borderColor: '{{ $eventColor }}',
+                    textColor: '#ffffff',
+                    extendedProps: {
+                        status: '{{ $schedule->status }}',
+                        amountPaid: '${{ number_format($schedule->amount_paid, 2) }}',
+                        isOverdue: {{ \Carbon\Carbon::parse($schedule->due_date)->lt(now()) && $schedule->status !== 'paid' ? 'true' : 'false' }}
+                    }
+                }@if(!$loop->last),@endif
+                @endforeach
+            ],
+            eventClick: function(info) {
+                var props = info.event.extendedProps;
+                var statusText = props.status === 'paid' ? 'បានបង់' : (props.isOverdue ? 'ហួសកំណត់' : 'រង់ចាំ');
+                var statusClass = props.status === 'paid' ? 'badge-success' : (props.isOverdue ? 'badge-danger' : 'badge-warning');
+
+                // Show event details in a modal or alert
+                alert('ថ្ងៃត្រូវបង់: ' + info.event.start.toLocaleDateString() + '\n' +
+                      'ចំនួនត្រូវបង់: ' + info.event.title + '\n' +
+                      'ចំនួនបានបង់: ' + props.amountPaid + '\n' +
+                      'ស្ថានភាព: ' + statusText);
+            },
+            eventMouseEnter: function(info) {
+                // Optional: Show tooltip on hover
+            }
+        });
+        calendar.render();
+        @endif
+
         if (typeof feather !== "undefined") feather.replace();
     });
     </script>

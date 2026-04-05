@@ -55,23 +55,20 @@
                                 <div class="form-body">
                                     <h5 class="card-title border-bottom pb-3 mb-4">ព័ត៌មានទូទៅ</h5>
                                     <div class="row">
-                                        <div class="col-md-6">
+                                        <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="code">លេខកូដ <span class="text-danger">*</span></label>
                                                 <input type="text" id="code" name="code" class="form-control @error('code') is-invalid @enderror" value="{{ old('code', $customer->code) }}" placeholder="បញ្ចូលលេខកូដ">
                                                 @error('code')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                             </div>
                                         </div>
-                                        <div class="col-md-6">
+                                        <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="name">ឈ្មោះអតិថិជន <span class="text-danger">*</span></label>
                                                 <input type="text" id="name" name="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name', $customer->name) }}" placeholder="បញ្ចូលឈ្មោះអតិថិជន">
                                                 @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                             </div>
                                         </div>
-                                    </div>
-
-                                    <div class="row">
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="gender">ភេទ <span class="text-danger">*</span></label>
@@ -79,10 +76,14 @@
                                                     <option value="">ជ្រើសរើសភេទ</option>
                                                     <option value="Male" {{ old('gender', $customer->gender) == 'Male' ? 'selected' : '' }}>ប្រុស</option>
                                                     <option value="Female" {{ old('gender', $customer->gender) == 'Female' ? 'selected' : '' }}>ស្រី</option>
+                                                    <option value="Other" {{ old('gender', $customer->gender) == 'Other' ? 'selected' : '' }}>ផ្សេងៗ</option>
                                                 </select>
                                                 @error('gender')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                             </div>
                                         </div>
+                                    </div>
+
+                                    <div class="row">
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="phone">លេខទូរសព្ទ <span class="text-danger">*</span></label>
@@ -92,28 +93,98 @@
                                         </div>
                                         <div class="col-md-4">
                                             <div class="form-group">
+                                                <label for="email">អ៊ីមែល</label>
+                                                <input type="email" id="email" name="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email', $customer->email) }}" placeholder="បញ្ចូលអ៊ីមែល">
+                                                @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="national_id">អត្តសញ្ញាណប័ណ្ណ</label>
+                                                <input type="text" id="national_id" name="national_id" class="form-control @error('national_id') is-invalid @enderror" value="{{ old('national_id', $customer->national_id) }}" placeholder="បញ្ចូលលេខអត្តសញ្ញាណប័ណ្ណ">
+                                                @error('national_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="date_of_birth">ថ្ងៃខែឆ្នាំកំណើត</label>
+                                                <input type="date" id="date_of_birth" name="date_of_birth" class="form-control @error('date_of_birth') is-invalid @enderror" value="{{ old('date_of_birth', $customer->date_of_birth ? \Carbon\Carbon::parse($customer->date_of_birth)->format('Y-m-d') : '') }}">
+                                                @error('date_of_birth')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="type">ប្រភេទអតិថិជន <span class="text-danger">*</span></label>
+                                                <select id="type" name="type" class="form-control custom-select @error('type') is-invalid @enderror">
+                                                    <option value="individual" {{ old('type', $customer->type) == 'individual' ? 'selected' : '' }}>ឯកត្តជន (Individual)</option>
+                                                    <option value="business" {{ old('type', $customer->type) == 'business' ? 'selected' : '' }}>អាជីវកម្ម (Business)</option>
+                                                </select>
+                                                @error('type')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
                                                 <label for="status">ស្ថានភាព <span class="text-danger">*</span></label>
                                                 <select id="status" name="status" class="form-control custom-select @error('status') is-invalid @enderror">
-                                                    <option value="1" {{ old('status', $customer->status) == '1' ? 'selected' : '' }}>កំពុងដំណើរការ</option>
-                                                    <option value="0" {{ old('status', $customer->status) == '0' ? 'selected' : '' }}>ផ្អាក</option>
+                                                    <option value="1" {{ old('status', $customer->status) ? 'selected' : '' }}>កំពុងដំណើរការ</option>
+                                                    <option value="0" {{ !old('status', $customer->status) ? 'selected' : '' }}>ផ្អាក</option>
                                                 </select>
                                                 @error('status')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                             </div>
                                         </div>
                                     </div>
+
                                     <div class="row">
-                                        <div class="col-md-6">
+                                        <div class="col-md-12">
                                             <div class="form-group">
                                                 <label for="address">អាស័យដ្ឋាន <span class="text-danger">*</span></label>
-                                                <input type="text" id="address" name="address" class="form-control @error('address') is-invalid @enderror" value="{{ old('address', $customer->address) }}" placeholder="បញ្ចូលអាស័យដ្ឋាន">
+                                                <textarea id="address" name="address" class="form-control @error('address') is-invalid @enderror" rows="2" placeholder="បញ្ចូលអាស័យដ្ឋាន">{{ old('address', $customer->address) }}</textarea>
                                                 @error('address')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                             </div>
                                         </div>
-                                        <div class="col-md-6">
+                                    </div>
+
+                                    <h5 class="card-title border-bottom pb-3 mb-4 mt-4">ព័ត៌មានហិរញ្ញវត្ថុ</h5>
+                                    <div class="row">
+                                        <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="type">ប្រភេទ <span class="text-danger">*</span></label>
-                                                <input type="text" id="type" name="type" class="form-control @error('type') is-invalid @enderror" value="{{ old('type', $customer->type) }}" placeholder="បញ្ចូលប្រភេទអតិថិជន">
-                                                @error('type')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                                <label for="occupation">មុខរបរ</label>
+                                                <input type="text" id="occupation" name="occupation" class="form-control @error('occupation') is-invalid @enderror" value="{{ old('occupation', $customer->occupation) }}" placeholder="បញ្ចូលមុខរបរ">
+                                                @error('occupation')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="monthly_income">ចំណូលប្រចាំខែ ($)</label>
+                                                <input type="number" step="0.01" id="monthly_income" name="monthly_income" class="form-control @error('monthly_income') is-invalid @enderror" value="{{ old('monthly_income', $customer->monthly_income) }}" placeholder="0.00">
+                                                @error('monthly_income')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="credit_score">ពិន្ទុឥណទាន (Credit Score)</label>
+                                                <input type="number" id="credit_score" name="credit_score" class="form-control @error('credit_score') is-invalid @enderror" value="{{ old('credit_score', $customer->credit_score) }}" placeholder="0 - 1000">
+                                                @error('credit_score')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-4">
+                                        <div class="col-md-6">
+                                            <div class="custom-control custom-checkbox mt-2">
+                                                <input type="hidden" name="age_verified" value="0">
+                                                <input type="checkbox" class="custom-control-input" id="age_verified" name="age_verified" value="1" {{ old('age_verified', $customer->age_verified) ? 'checked' : '' }}>
+                                                <label class="custom-control-label" for="age_verified">បានផ្ទៀងផ្ទាត់អាយុ (Age Verified)</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="custom-control custom-checkbox mt-2">
+                                                <input type="hidden" name="has_existing_loan" value="0">
+                                                <input type="checkbox" class="custom-control-input" id="has_existing_loan" name="has_existing_loan" value="1" {{ old('has_existing_loan', $customer->has_existing_loan) ? 'checked' : '' }}>
+                                                <label class="custom-control-label" for="has_existing_loan">មានកម្ចីស្រាប់ (Has Existing Loan)</label>
                                             </div>
                                         </div>
                                     </div>
@@ -122,20 +193,20 @@
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="document">រូបថត/ឯកសារថ្មី (ទុកទទេបើមិនចង់ប្តូរ)</label>
+                                                <label for="document_path">រូបថត/ឯកសារ</label>
                                                 <div class="custom-file">
-                                                    <input type="file" class="custom-file-input @error('document') is-invalid @enderror" id="document" name="document" onchange="previewImage(event)" data-default-src="{{ $customer->document ? asset('uploads/' . $customer->document) : '' }}">
-                                                    <label class="custom-file-label" for="document">ជ្រើសរើសឯកសារ...</label>
+                                                    <input type="file" class="custom-file-input @error('document_path') is-invalid @enderror" id="document_path" name="document_path" onchange="previewImage(event)">
+                                                    <label class="custom-file-label" for="document_path">{{ $customer->document_path ?? 'ជ្រើសរើសឯកសារ...' }}</label>
                                                 </div>
-                                                @error('document')<div class="text-danger mt-2 small">{{ $message }}</div>@enderror
+                                                @error('document_path')<div class="text-danger mt-2 small">{{ $message }}</div>@enderror
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label>រូបភាពបច្ចុប្បន្ន / មើលរូបភាពថ្មី</label>
+                                                <label>ការពិនិត្យមើលរូបភាព</label>
                                                 <div class="border rounded d-flex align-items-center justify-content-center bg-light" style="min-height: 200px; border: 2px dashed #e8eef3 !important;">
-                                                    @if($customer->document)
-                                                        <img id="preview" src="{{ asset('uploads/' . $customer->document) }}" class="img-fluid rounded shadow-sm" style="max-height: 180px; object-fit: cover;" alt="Preview">
+                                                    @if($customer->document_path)
+                                                        <img id="preview" src="{{ asset('uploads/' . $customer->document_path) }}" class="img-fluid rounded shadow-sm" style="max-height: 180px; object-fit: cover;" alt="Preview">
                                                         <div id="empty-preview" class="text-center text-muted d-none">
                                                             <i data-feather="image" class="mb-2 text-secondary" style="width: 40px; height: 40px;"></i>
                                                             <p class="mb-0">មិនទាន់មានរូបភាព</p>

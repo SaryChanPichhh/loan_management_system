@@ -54,6 +54,7 @@ class DatabaseSeeder extends Seeder
                 TransactionSeeder::class,
 
                 RepaymentSeeder::class,
+                
             ]);
 
             DB::commit();

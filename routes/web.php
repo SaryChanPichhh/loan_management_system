@@ -14,6 +14,7 @@ use App\Http\Controllers\Backend\SettingController;
 use App\Http\Controllers\Backend\LoanProductController;
 use App\Http\Controllers\Backend\GuarantorController;
 use App\Http\Controllers\Backend\LoanApplicationController;
+use App\Http\Controllers\Backend\AccountingController;
 use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 
@@ -60,28 +61,29 @@ Route::middleware(['auth', 'permission'])->group(function () {
         Route::delete('/customer/{customer}', 'destroy')->name('customer.destroy');
     });
 
-/*
+    /*
 |--------------------------------------------------------------------------
 | Loans
 |--------------------------------------------------------------------------
 */
-Route::controller(LoanController::class)->group(function () {
-    Route::get('/loans', 'index')->name('loans.index');
-    Route::get('/loans/create', 'create')->name('loans.create');
-    Route::post('/loans', 'store')->name('loans.store');
-    Route::get('/loans/defaulted', 'defaulted')->name('loans.defaulted');
-    Route::get('/loans/customer-eligibility', 'checkCustomerEligibility')->name('loans.customer_eligibility');
-    Route::get('/loans/{id}', 'show')->name('loans.show');
-    Route::get('/loans/edit/{id}', 'edit')->name('loans.edit');
-    Route::put('/loans/{id}', 'update')->name('loans.update');
-    Route::delete('/loans/{id}', 'destroy')->name('loans.destroy');
-    Route::post('/loans/{id}/submit-review', 'submitForReview')->name('loans.submit_review');
-    Route::get('/loans/review/{id}', 'review')->name('loans.review');
-    Route::post('/loans/{id}/approve', 'approve')->name('loans.approve');
-    Route::post('/loans/{id}/reject', 'reject')->name('loans.reject');
-    Route::post('/loans/{id}/disburse', 'disburse')->name('loans.disburse');
-    Route::get('/loans/payments/{id}', 'payments')->name('loans.payments');
-});
+    Route::controller(LoanController::class)->group(function () {
+        Route::get('/loans', 'index')->name('loans.index');
+        Route::get('/loans/create', 'create')->name('loans.create');
+        Route::post('/loans', 'store')->name('loans.store');
+        Route::get('/loans/defaulted', 'defaulted')->name('loans.defaulted');
+        Route::get('/loans/calendar', 'calendar')->name('loans.calendar');
+        Route::get('/loans/customer-eligibility', 'checkCustomerEligibility')->name('loans.customer_eligibility');
+        Route::get('/loans/{id}', 'show')->name('loans.show');
+        Route::get('/loans/edit/{id}', 'edit')->name('loans.edit');
+        Route::put('/loans/{id}', 'update')->name('loans.update');
+        Route::delete('/loans/{id}', 'destroy')->name('loans.destroy');
+        Route::post('/loans/{id}/submit-review', 'submitForReview')->name('loans.submit_review');
+        Route::get('/loans/review/{id}', 'review')->name('loans.review');
+        Route::post('/loans/{id}/approve', 'approve')->name('loans.approve');
+        Route::post('/loans/{id}/reject', 'reject')->name('loans.reject');
+        Route::post('/loans/{id}/disburse', 'disburse')->name('loans.disburse');
+        Route::get('/loans/payments/{id}', 'payments')->name('loans.payments');
+    });
 
     /*
     |--------------------------------------------------------------------------
@@ -93,7 +95,7 @@ Route::controller(LoanController::class)->group(function () {
         Route::post('/repayments/store', 'store')->name('repayments.store');
         Route::get('/repayments/overdue', 'overdue')->name('repayments.overdue');
         Route::get('/repayments/loan/{id}', 'show')->name('repayments.show');
-        Route::get('/repayments/create/{loan_id}', 'create')->name('repayments.create');
+        Route::get('/repayments/create/{loan_id?}', 'create')->name('repayments.create');
         Route::get('/repayments/{id}/edit', 'edit')->name('repayments.edit');
     });
 
@@ -171,6 +173,17 @@ Route::controller(LoanController::class)->group(function () {
         Route::get('/settings/exchange-rate/edit/{id}', 'exchange_rate_edit')->name('settings.exchange_rate.edit');
         Route::put('/settings/exchange-rate/update/{id}', 'exchange_rate_update')->name('settings.exchange_rate.update');
         Route::delete('/settings/exchange-rate/delete/{id}', 'exchange_rate_delete')->name('settings.exchange_rate.delete');
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Accounting (General Ledger)
+    |--------------------------------------------------------------------------
+    */
+    Route::controller(AccountingController::class)->group(function () {
+        Route::get('/accounting', 'index')->name('accounting.index');
+        Route::get('/accounting/journal', 'journal')->name('accounting.journal');
+        Route::get('/accounting/ledger/{id}', 'ledger')->name('accounting.ledger');
     });
 });
 

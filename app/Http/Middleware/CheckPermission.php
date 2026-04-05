@@ -41,7 +41,7 @@ class CheckPermission
         // Check if the user has the required permission (direct or via role)
         if (!$user->hasPermission($permission)) {
             // Abort with 403 Forbidden if they don't have permission
-            abort(403, "អ្នកមិនមានសិទ្ធិចូលមើលទំព័រនេះទេ។ (Missing Permission: $permission)");
+            abort(403, "អ្នកមិនមានសិទ្ធិចូលមើលទំព័រនេះទេ។");
         }
 
         return $next($request);

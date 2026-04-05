@@ -91,6 +91,7 @@
                                         <th>អ្នកខ្ចី</th>
                                         <th>Product</th>
                                         <th>ចំនួនទឹកប្រាក់</th>
+                                        <th>សមតុល្យ (Balance)</th>
                                         <th>រយៈពេល</th>
                                         <th>ការប្រាក់ (%)</th>
                                         <th>ស្ថានភាព</th>
@@ -105,6 +106,11 @@
                                             <td>{{ $loan->customer->name ?? 'N/A' }}</td>
                                             <td>{{ $loan->product->name ?? '—' }}</td>
                                             <td>${{ number_format($loan->principal_amount, 2) }}</td>
+                                            <td class="text-right">
+                                                <span class="font-weight-bold text-danger">
+                                                    ${{ number_format($loan->totalRemainingBalance(), 2) }}
+                                                </span>
+                                            </td>
                                             <td>{{ $loan->duration_months }} ខែ</td>
                                             <td>{{ $loan->interest_rate }}%</td>
                                             <td>
@@ -146,7 +152,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="9" class="text-center text-muted py-4">
+                                            <td colspan="10" class="text-center text-muted py-4">
                                                 <i data-feather="inbox"></i> មិនមានទិន្នន័យ
                                             </td>
                                         </tr>

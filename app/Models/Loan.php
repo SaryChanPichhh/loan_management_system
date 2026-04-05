@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 
 class Loan extends Model
 {
@@ -124,6 +125,15 @@ class Loan extends Model
             'written_off'  => 'ចាត់ទុកជាខាត',
             default        => $this->status,
         };
+    }
+
+    /**
+     * Calculate the total remaining balance (Principal + Interest).
+     */
+    public function totalRemainingBalance(): float
+    {
+        // Sum of (amount_due - amount_paid) for all schedule entries
+        return (float) $this->schedules()->sum(DB::raw('amount_due - amount_paid'));
     }
 
     /**

@@ -37,7 +37,7 @@
                         class="sidebar-link sidebar-link"
                         href="{{ route('customer.index') }}"
                         aria-expanded="false"
-                    ><i class="icon-people"></i
+                        ><i class="icon-people"></i
                         ><span class="hide-menu">អតិថិជន</span></a
                     >
                 </li>
@@ -46,7 +46,7 @@
                         class="sidebar-link sidebar-link"
                         href="{{ route('guarantors.index') }}"
                         aria-expanded="false"
-                    ><i data-feather="user-check" class="feather-icon"></i
+                        ><i data-feather="user-check" class="feather-icon"></i
                         ><span class="hide-menu">អ្នកធានា</span></a
                     >
                 </li>
@@ -73,7 +73,10 @@
                                 href="{{ route('loan_applications.index') }}"
                                 aria-expanded="false"
                             >
-                                <i data-feather="file-text" class="feather-icon">
+                                <i
+                                    data-feather="file-text"
+                                    class="feather-icon"
+                                >
                                 </i>
                                 <span class="hide-menu">សំណើសុំកម្ចី</span>
                             </a>
@@ -116,10 +119,22 @@
                                 <span class="hide-menu">កម្ចីមិនទាន់សង</span>
                             </a>
                         </li>
-
+                        <li class="sidebar-item">
+                            <a
+                                class="sidebar-link"
+                                href="{{ route('loans.calendar') }}"
+                                aria-expanded="false"
+                            >
+                                <i
+                                    data-feather="calendar"
+                                    class="feather-icon"
+                                ></i>
+                                <span class="hide-menu">ប្រតិទិនទូទាត់</span>
+                            </a>
+                        </li>
                     </ul>
                 </li>
-                
+
                 <li class="sidebar-item">
                     <a
                         class="sidebar-link sidebar-link"
@@ -152,7 +167,9 @@
                             >
                                 <i data-feather="list" class="feather-icon">
                                 </i>
-                                <span class="hide-menu">ការសងប្រាក់ទាំងអស់</span>
+                                <span class="hide-menu"
+                                    >ការសងប្រាក់ទាំងអស់</span
+                                >
                             </a>
                         </li>
                         <li class="sidebar-item">
@@ -166,11 +183,56 @@
                                     class="feather-icon"
                                 >
                                 </i>
-                                <span class="hide-menu">កត់ត្រាការបង់ប្រាក់</span>
+                                <span class="hide-menu"
+                                    >កត់ត្រាការបង់ប្រាក់</span
+                                >
                             </a>
                         </li>
                     </ul>
                 </li>
+                <!-- {{-- Accounting --}}
+                <li class="sidebar-item">
+                    <a
+                        class="sidebar-link has-arrow"
+                        href="javascript:void(0)"
+                        aria-expanded="false"
+                    >
+                        <i data-feather="book" class="feather-icon"></i>
+                        <span class="hide-menu">គណនេយ្យ (Accounting)</span>
+                    </a>
+                    <ul
+                        aria-expanded="false"
+                        class="collapse first-level base-level-line"
+                    >
+                        <li class="sidebar-item">
+                            <a
+                                class="sidebar-link sidebar-link"
+                                href="{{ route('accounting.index') }}"
+                                aria-expanded="false"
+                            >
+                                <i data-feather="list" class="feather-icon"></i>
+                                <span class="hide-menu"
+                                    >តារាងគណនេយ្យ (COA)</span
+                                >
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a
+                                class="sidebar-link sidebar-link"
+                                href="{{ route('accounting.journal') }}"
+                                aria-expanded="false"
+                            >
+                                <i
+                                    data-feather="file-text"
+                                    class="feather-icon"
+                                ></i>
+                                <span class="hide-menu"
+                                    >ទិនានុប្បវត្តិ (Journal)</span
+                                >
+                            </a>
+                        </li>
+                    </ul>
+                </li> -->
                 {{-- Activity log--}}
                 <li class="sidebar-item">
                     <a
@@ -192,17 +254,33 @@
                         <span class="hide-menu">Role</span>
                     </a>
                 </li>
-                <li class="sidebar-item"> <a class="sidebar-link has-arrow" href="javascript:void(0)"
-                                             aria-expanded="false"><i data-feather="file-text" class="feather-icon"></i><span
-                            class="hide-menu">ការកំណត់ </span></a>
-                    <ul aria-expanded="false" class="collapse  first-level base-level-line">
-                        <li class="sidebar-item"><a href="{{ route('settings.company_profile') }}"
-                                                    class="sidebar-link"><span class="hide-menu"> អំពីគណនី
-                                 </span></a>
+                <li class="sidebar-item">
+                    <a
+                        class="sidebar-link has-arrow"
+                        href="javascript:void(0)"
+                        aria-expanded="false"
+                        ><i data-feather="file-text" class="feather-icon"></i
+                        ><span class="hide-menu">ការកំណត់ </span></a
+                    >
+                    <ul
+                        aria-expanded="false"
+                        class="collapse first-level base-level-line"
+                    >
+                        <li class="sidebar-item">
+                            <a
+                                href="{{ route('settings.company_profile') }}"
+                                class="sidebar-link"
+                                ><span class="hide-menu"> អំពីគណនី </span></a
+                            >
                         </li>
-                        <li class="sidebar-item"><a href="{{ route('settings.exchange_rate') }}"
-                                                    class="sidebar-link"><span class="hide-menu"> អត្រាការប្រាក់
-                                 </span></a>
+                        <li class="sidebar-item">
+                            <a
+                                href="{{ route('settings.exchange_rate') }}"
+                                class="sidebar-link"
+                                ><span class="hide-menu">
+                                    អត្រាការប្រាក់
+                                </span></a
+                            >
                         </li>
                     </ul>
                 </li>

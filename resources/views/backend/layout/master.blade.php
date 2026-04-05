@@ -8,11 +8,9 @@
             rel="icon"
             type="image/png"
             sizes="16x16"
-            href="{{ asset('backend_assets/assets/images/favicon.png') }}"
+            href="{{ asset('backend_assets/assets/images/setec_logo.png') }}"
         />
-        <title>
-            Adminmart Template - The Ultimate Multipurpose admin template
-        </title>
+        <title>SETEC-INSTITUTE-LOAN</title>
 
         @include('backend.layout.style') @stack('styles')
     </head>

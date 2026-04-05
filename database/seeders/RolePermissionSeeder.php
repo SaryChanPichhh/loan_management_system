@@ -41,6 +41,7 @@ class RolePermissionSeeder extends Seeder
 
             ['name' => 'Loans Index', 'slug' => 'loans.index', 'module' => 'Loans', 'description' => 'Allow access to loans.index'],
             ['name' => 'Loans Create', 'slug' => 'loans.create', 'module' => 'Loans', 'description' => 'Allow access to loans.create'],
+            ['name' => 'Loans Calendar', 'slug' => 'loans.calendar', 'module' => 'Loans', 'description' => 'Allow access to loans.calendar'],
             ['name' => 'Loans Defaulted', 'slug' => 'loans.defaulted', 'module' => 'Loans', 'description' => 'Allow access to loans.defaulted'],
             ['name' => 'Loans Show', 'slug' => 'loans.show', 'module' => 'Loans', 'description' => 'Allow access to loans.show'],
             ['name' => 'Loans Edit', 'slug' => 'loans.edit', 'module' => 'Loans', 'description' => 'Allow access to loans.edit'],

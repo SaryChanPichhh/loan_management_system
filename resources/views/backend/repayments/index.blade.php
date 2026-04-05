@@ -18,10 +18,10 @@
                 </form>
 
                 <!-- Status Filter Dropdown -->
-                <div class="dropdown">
+                <div class="dropdown mr-3">
                     <button class="btn btn-outline-secondary rounded-pill shadow-sm px-4 dropdown-toggle d-flex align-items-center" type="button" id="filterDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <i data-feather="filter" class="mr-2" style="width: 16px; height: 16px;"></i>
-                        {{ $status ? ucfirst($status) : 'ទាំងអស់ (All)' }}
+                        {{ request('status') ?: 'ទាំងអស់ (All)' }}
                     </button>
                     <div class="dropdown-menu dropdown-menu-right shadow-sm" aria-labelledby="filterDropdown">
                         <a class="dropdown-item" href="{{ route('repayments.index') }}">ទាំងអស់ (All)</a>
@@ -31,6 +31,12 @@
                         <a class="dropdown-item text-danger" href="{{ route('repayments.index', ['status' => 'Failed']) }}"><i data-feather="x-circle" class="mr-2" style="width:14px;height:14px;"></i>Failed (បរាជ័យ)</a>
                     </div>
                 </div>
+
+                <!-- Create New Button -->
+                <a href="{{ route('repayments.create') }}" class="btn btn-primary rounded-pill shadow-sm px-4 d-flex align-items-center">
+                    <i data-feather="plus" class="mr-2" style="width: 16px; height: 16px;"></i>
+                    <span>បង្កើតថ្មី (Create New)</span>
+                </a>
             </div>
         </div>
 
@@ -53,45 +59,49 @@
                             </thead>
                             <tbody>
                                 @forelse($repayments as $key => $repayment)
-                                <tr class="border-bottom">
+                                <tr class="border-bottom text-dark">
                                     <td class="px-4 py-3">{{ $repayments->firstItem() + $key }}</td>
                                     <td class="py-3">
                                         <div class="font-weight-bold text-primary">
-                                            <i data-feather="file-text" style="width: 14px; height: 14px;" class="mr-1"></i> {{ $repayment->loan_reference }}
+                                            <i data-feather="file-text" style="width: 14px; height: 14px;" class="mr-1"></i> {{ $repayment->loan->loan_code ?? 'N/A' }}
                                         </div>
-                                        <small class="text-muted">Ref: {{ $repayment->reference_number ?? 'N/A' }}</small>
+                                        <small class="text-muted">Installment #{{ $repayment->schedule->installment_number ?? '?' }}</small>
                                     </td>
                                     <td class="py-3">
                                         <div class="d-flex align-items-center">
+                                            @php
+                                                $customerName = $repayment->loan->customer->name ?? 'Unknown';
+                                            @endphp
                                             <div class="avatar-sm bg-light text-secondary rounded-circle text-center d-flex align-items-center justify-content-center mr-2 shadow-sm" style="width: 32px; height: 32px;">
-                                                <b style="font-size: 0.8rem;">{{ mb_substr($repayment->customer_name, 0, 1) }}</b>
+                                                <b style="font-size: 0.8rem;">{{ mb_substr($customerName, 0, 1) }}</b>
                                             </div>
-                                            <span class="font-weight-bold text-dark">{{ $repayment->customer_name }}</span>
+                                            <div>
+                                                <div class="font-weight-bold text-dark">{{ $customerName }}</div>
+                                                <small class="text-muted">ID: {{ $repayment->loan->customer->code ?? 'N/A' }}</small>
+                                            </div>
                                         </div>
                                     </td>
                                     <td class="py-3 text-right">
-                                        <span class="font-weight-bold text-dark text-success">${{ number_format($repayment->amount, 2) }}</span>
+                                        <span class="font-weight-bold text-success">${{ number_format($repayment->amount, 2) }}</span>
                                     </td>
                                     <td class="py-3 text-center">
                                         <span class="badge badge-light text-secondary border rounded-pill px-3 py-1">
-                                            @if(strtolower($repayment->payment_method) == 'cash')
-                                                <i data-feather="dollar-sign" style="width:12px; height:12px;" class="mr-1"></i>
-                                            @else
-                                                <i data-feather="briefcase" style="width:12px; height:12px;" class="mr-1"></i>
-                                            @endif
                                             {{ $repayment->payment_method }}
                                         </span>
                                     </td>
                                     <td class="py-3 text-muted">
-                                        {{ \Carbon\Carbon::parse($repayment->payment_date)->format('d-M-Y') }}
+                                        {{ $repayment->payment_date ? $repayment->payment_date->format('d-M-Y') : 'N/A' }}
                                     </td>
                                     <td class="py-3 text-center">
-                                        @if(strtolower($repayment->status) == 'paid')
+                                        @php
+                                            $status = strtolower($repayment->status);
+                                        @endphp
+                                        @if($status == 'completed' || $status == 'paid')
                                             <span class="badge badge-success rounded-pill px-3 py-1"><i data-feather="check" class="mr-1" style="width:12px;height:12px;"></i> Paid</span>
-                                        @elseif(strtolower($repayment->status) == 'failed')
+                                        @elseif($status == 'failed')
                                             <span class="badge badge-danger rounded-pill px-3 py-1"><i data-feather="x" class="mr-1" style="width:12px;height:12px;"></i> Failed</span>
                                         @else
-                                            <span class="badge badge-warning text-dark rounded-pill px-3 py-1"><i data-feather="clock" class="mr-1" style="width:12px;height:12px;"></i> Pending</span>
+                                            <span class="badge badge-warning text-dark rounded-pill px-3 py-1"><i data-feather="clock" class="mr-1" style="width:12px;height:12px;"></i> {{ ucfirst($status) }}</span>
                                         @endif
                                     </td>
                                 </tr>
