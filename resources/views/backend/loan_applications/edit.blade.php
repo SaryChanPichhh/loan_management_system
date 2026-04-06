@@ -90,6 +90,18 @@
                                             <input type="number" name="requested_months" class="form-control" value="{{ old('requested_months', $application->requested_months) }}" required min="1">
                                         </div>
                                     </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>ថ្ងៃចាប់ផ្តើម</label>
+                                            <input type="date" name="start_date" class="form-control" value="{{ old('start_date', $application->start_date ? $application->start_date->format('Y-m-d') : '') }}" min="{{ date('Y-m-01') }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>ថ្ងៃបញ្ចប់</label>
+                                            <input type="date" name="end_date" class="form-control" value="{{ old('end_date', $application->end_date ? $application->end_date->format('Y-m-d') : '') }}" readonly>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-12">
@@ -183,11 +195,36 @@
             validateMonths();
         });
         amountInput.on('input', validateAmount);
-        monthsInput.on('input', validateMonths);
+        monthsInput.on('input', function() {
+            validateMonths();
+            updateEndDate();
+        });
+
+        const startDateInput = $('input[name="start_date"]');
+        const endDateInput = $('input[name="end_date"]');
+
+        function updateEndDate() {
+            const startDate = startDateInput.val();
+            const months = parseInt(monthsInput.val());
+            
+            if (startDate && !isNaN(months)) {
+                let date = new Date(startDate);
+                date.setMonth(date.getMonth() + months);
+                
+                const year = date.getFullYear();
+                const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                const day = date.getDate().toString().padStart(2, '0');
+                
+                endDateInput.val(`${year}-${month}-${day}`);
+            }
+        }
+
+        startDateInput.on('change', updateEndDate);
         
         // Run once on load to validate existing data
         validateAmount();
         validateMonths();
+        updateEndDate();
     });
 </script>
 @endpush

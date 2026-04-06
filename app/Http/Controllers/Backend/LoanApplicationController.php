@@ -22,7 +22,9 @@ class LoanApplicationController extends Controller
 
     public function create()
     {
-        $customers = Customer::where('status', 1)->get();
+        $customers = Customer::with(['guarantors' => function ($query) {
+            $query->where('status', 'active');
+        }])->where('status', 1)->get();
         // UI validation: Only active products are shown
         $products = LoanProduct::active()->get();
         
@@ -73,7 +75,9 @@ class LoanApplicationController extends Controller
             return redirect()->route('loan_applications.index')->with('error', 'មានតែសំណើដែលមិនទាន់ពិនិត្យ (Pending) ប៉ុណ្ណោះដែលអាចកែប្រែបាន!');
         }
 
-        $customers = Customer::where('status', 1)->get();
+        $customers = Customer::with(['guarantors' => function ($query) {
+            $query->where('status', 'active');
+        }])->where('status', 1)->get();
         $products = LoanProduct::active()->get();
         return view('backend.loan_applications.edit', compact('application', 'customers', 'products'));
     }
@@ -138,6 +142,8 @@ class LoanApplicationController extends Controller
         if ($newStatus === 'approved') {
             $rules['approved_amount'] = 'required|numeric|min:0.01';
             $rules['approved_months'] = 'required|integer|min:1';
+            $rules['start_date'] = 'required|date|after_or_equal:' . date('Y-m-01');
+            $rules['end_date'] = 'required|date|after:start_date';
         }
 
         $request->validate($rules);
@@ -155,36 +161,82 @@ class LoanApplicationController extends Controller
         
         // Removed submitted_at reference as requested
 
-        if (in_array($newStatus, ['approved', 'rejected'])) {
-            $application->reviewed_by = Auth::id();
-            $application->reviewed_at = now();
-        }
+        \Illuminate\Support\Facades\DB::beginTransaction();
 
-        if ($newStatus === 'approved') {
-            // Validate limits
-            if ($request->approved_amount < $product->min_amount || $request->approved_amount > $product->max_amount) {
-                return redirect()->back()->with('error', 'ចំនួនប្រាក់អនុម័ត ត្រូវតែស្ថិតក្នុងចន្លោះពី $' . $product->min_amount . ' ទៅ $' . $product->max_amount);
+        try {
+            if ($newStatus === 'approved') {
+                $application->reviewed_by = Auth::id();
+                $application->reviewed_at = now();
+                
+                // Validate limits
+                if ($request->approved_amount < $product->min_amount || $request->approved_amount > $product->max_amount) {
+                    return redirect()->back()->with('error', 'ចំនួនប្រាក់អនុម័ត ត្រូវតែស្ថិតក្នុងចន្លោះពី $' . $product->min_amount . ' ទៅ $' . $product->max_amount);
+                }
+                if ($request->approved_months > $product->max_term_months || $request->approved_months < 1) {
+                    return redirect()->back()->with('error', 'រយៈពេលអនុម័តអតិបរមាគឺ ' . $product->max_term_months . ' ខែ');
+                }
+                
+                $application->start_date = $request->start_date;
+                $application->end_date = $request->end_date;
             }
-            if ($request->approved_months > $product->max_term_months || $request->approved_months < 1) {
-                return redirect()->back()->with('error', 'រយៈពេលអនុម័តអតិបរមាគឺ ' . $product->max_term_months . ' ខែ');
+
+            if ($newStatus === 'rejected') {
+                $application->reviewed_by = Auth::id();
+                $application->reviewed_at = now();
+                $application->rejection_reason = $request->rejection_reason;
             }
-            
-            $application->approved_amount = $request->approved_amount;
-            $application->approved_months = $request->approved_months;
+
+            $application->status = $newStatus;
+            $application->save();
+
+            // Auto create loan if approved
+            if ($newStatus === 'approved') {
+                $startDate = \Carbon\Carbon::parse($request->start_date);
+                $firstPaymentDate = $startDate->copy()->addMonth(); // Assuming monthly payments
+                $gracePeriodEndDate = $firstPaymentDate->copy()->addDays($product->grace_period_days);
+
+                $loan = new \App\Models\Loan();
+                $loan->loan_code = 'LN-' . strtoupper(Str::random(6)) . time();
+                $loan->customer_id = $application->customer_id;
+                $loan->product_id = $application->product_id;
+                $loan->application_id = $application->id;
+                $loan->principal_amount = $request->approved_amount;
+                $loan->interest_rate = $product->interest_rate;
+                $loan->duration_months = $request->approved_months;
+                
+                $loan->start_date = \Carbon\Carbon::parse($request->start_date)->toDateString();
+                $loan->end_date = \Carbon\Carbon::parse($request->end_date)->toDateString();
+                $loan->first_payment_date = $firstPaymentDate->toDateString();
+                $loan->grace_days = (int) ($product->grace_period_days ?? 3);
+                $loan->status = 'approved';
+                
+                $loan->approved_by = Auth::id();
+                $loan->created_by = Auth::id();
+                $loan->purpose = $application->purpose; // Copy purpose if any
+                
+                // Set guarantor and collateral rules based on amounts
+                $loan->guarantor_required = ($request->approved_amount > 500);
+                $loan->collateral_required = ($request->approved_amount > 5000);
+                
+                $loan->save();
+
+                // Update application with new loan_id
+                $application->loan_id = $loan->id;
+                $application->save();
+            }
+
+            \Illuminate\Support\Facades\DB::commit();
+
+            if ($newStatus === 'under_review' && $oldStatus === 'pending') {
+                return redirect()->route('loan_applications.show', $application->id)->with('success', 'ស្ថានភាពបានផ្លាស់ប្តូរទៅជា កំពុងពិនិត្យ! សូមបំពេញព័ត៌មានបន្ថែម។');
+            }
+
+            return redirect()->back()->with('success', 'មានការផ្លាស់ប្តូរដោយជោគជ័យ!');
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+            return redirect()->back()->with('error', 'មានបញ្ហាអំឡុងពេលរក្សាទុក៖ ' . $e->getMessage());
         }
-
-        if ($newStatus === 'rejected') {
-            $application->rejection_reason = $request->rejection_reason;
-        }
-
-        $application->status = $newStatus;
-        $application->save();
-
-        if ($newStatus === 'under_review' && $oldStatus === 'pending') {
-            return redirect()->route('loan_applications.show', $application->id)->with('success', 'ស្ថានភាពបានផ្លាស់ប្តូរទៅជា កំពុងពិនិត្យ! សូមបំពេញព័ត៌មានបន្ថែម។');
-        }
-
-        return redirect()->back()->with('success', 'ផ្លាស់ប្តូរស្ថានភាពដោយជោគជ័យ!');
     }
 
     protected function validateApplicationBusinessRules(Request $request, $product, $customer)
@@ -205,18 +257,44 @@ class LoanApplicationController extends Controller
             return "ផលិតផលកម្ចីនេះត្រូវបានបិទដំណើរការ";
         }
 
-        if ($amount > $product->requires_guarantor_above) {
-            $hasGuarantor = Guarantor::where('customer_id', $customer->id)->whereIn('status', ['active'])->exists();
-            if (!$hasGuarantor) {
-                return "ចំនួនប្រាក់នេះតម្រូវឲ្យមានអ្នកធានាសកម្មយ៉ាងហោចណាស់ម្នាក់! សូមបញ្ចូលអ្នកធានាសម្រាប់អតិថិជននេះជាមុនសិន។";
+        if ($amount >= 500) {
+            // Calculate estimated monthly payment
+            $rate = ($product->interest_rate / 100) / 12;
+            if ($rate == 0) {
+                $monthlyPayment = $amount / $months;
+            } else {
+                $monthlyPayment = ($amount * $rate * pow(1 + $rate, $months)) / (pow(1 + $rate, $months) - 1);
+            }
+
+            $requiredCustomerIncome = $monthlyPayment * 1.5;
+
+            // Customer must have [monthly_income >= Monthly Loan Payment × 1.5]
+            if ($customer->monthly_income < $requiredCustomerIncome) {
+                return "ចំណូលរបស់អតិថិជនមិនគ្រប់គ្រាន់! ត្រូវមានចំណូលយ៉ាងហោចណាស់ $" . number_format($requiredCustomerIncome, 2) . " /ខែ (ស្មើនឹង ១.៥ ដងនៃប្រាក់សងប្រចាំខែ $" . number_format($monthlyPayment, 2) . ")";
+            }
+
+            // If <= 5000 and multiplier > 0, guarantor is required and must have sufficient income
+            if ($amount <= 5000 && $product->guarantor_income_multiplier > 0) {
+                $hasGuarantor = Guarantor::where('customer_id', $customer->id)->whereIn('status', ['active'])->exists();
+                if (!$hasGuarantor) {
+                    return "កម្ចីទំហំ $500 - $5,000 តម្រូវឲ្យមានអ្នកធានាសកម្មយ៉ាងហោចណាស់ម្នាក់! សូមបញ្ចូលអ្នកធានាសម្រាប់អតិថិជននេះជាមុនសិន។";
+                }
+
+                $requiredIncome = $monthlyPayment * $product->guarantor_income_multiplier;
+                $qualifiedGuarantor = Guarantor::where('customer_id', $customer->id)
+                    ->whereIn('status', ['active'])
+                    ->where('income', '>=', $requiredIncome)
+                    ->exists();
+
+                if (!$qualifiedGuarantor) {
+                    return "ចំណូលអ្នកធានាមិនគ្រប់គ្រាន់! ត្រូវមានយ៉ាងហោចណាស់ $" . number_format($requiredIncome, 2) . " /ខែ (ស្មើនឹង {$product->guarantor_income_multiplier} ដងនៃប្រាក់សងប្រចាំខែ $" . number_format($monthlyPayment, 2) . ")";
+                }
             }
         }
 
-        if ($amount > $product->requires_collateral_above) {
-            // Business rule: Collateral required.
-            // As loan_collaterals attaches to loan_id, we just flag the info or fail if they want strict check.
-            // Here we just warn or pass, since we can't create collateral without loan_id.
-            // But if the requirement says "require collateral", we should add a session warning or note.
+        if ($amount > 5000) {
+            // Business rule: Collateral required. At the application phase, we just warn the user.
+            session()->flash('warning', "ចំណាំ: កម្ចីទំហំលើសពី $5,000 តម្រូវឲ្យមានទ្រព្យបញ្ចាំរូបវន្តដែលមានតម្លៃយ៉ាងហោចណាស់ ១២០% នៃទំហំកម្ចី ពេលបង្កើតកម្ចីជាក់ស្តែង។");
         }
 
         return null;

@@ -55,7 +55,8 @@
                                         'under_review' => ['label' => 'កំពុងពិនិត្យ', 'badge' => 'info'],
                                         'approved'  => ['label' => 'បានអនុម័ត',        'badge' => 'primary'],
                                         'active'    => ['label' => 'កំពុងដំណើរការ',    'badge' => 'success'],
-                                        'completed' => ['label' => 'បានបញ្ចប់',        'badge' => 'secondary'],
+                                        'overdue'   => ['label' => 'ហួសកំណត់ (Overdue)','badge' => 'danger'],
+                                        'completed' => ['label' => 'បានបញ្ចប់',        'badge' => 'primary'],
                                         'defaulted' => ['label' => 'មិនបានសង',         'badge' => 'danger'],
                                         'rejected'  => ['label' => 'បដិសេធ',           'badge' => 'danger'],
                                         'written_off' => ['label' => 'ចាត់ទុកជាខាត',  'badge' => 'dark'],
@@ -109,6 +110,9 @@
                                             <td>{{ $loan->interest_rate }}%</td>
                                             <td>
                                                 <span class="badge {{ $loan->statusBadge() }}">{{ $loan->statusLabel() }}</span>
+                                                @if($loan->status === 'active' && $loan->account && $loan->account->days_past_due > 0)
+                                                    <span class="badge badge-danger mt-1 d-block"><i data-feather="alert-circle" style="width:12px; height: 12px"></i> Overdue ({{ $loan->account->days_past_due }} ថ្ងៃ)</span>
+                                                @endif
                                             </td>
                                             <td>{{ $loan->start_date ? $loan->start_date->format('d/m/Y') : '—' }}</td>
                                             <td>

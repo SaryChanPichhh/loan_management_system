@@ -18,7 +18,7 @@ class LoanProduct extends Model
         'max_term_months',
         'grace_period_days',
         'late_fee_rate',
-        'requires_guarantor_above',
+        'guarantor_income_multiplier',
         'requires_collateral_above',
         'penalty_rate',
         'status',
@@ -30,7 +30,7 @@ class LoanProduct extends Model
         'interest_rate'             => 'decimal:4',
         'late_fee_rate'             => 'decimal:4',
         'penalty_rate'              => 'decimal:4',
-        'requires_guarantor_above'  => 'decimal:2',
+        'guarantor_income_multiplier' => 'decimal:2',
         'requires_collateral_above' => 'decimal:2',
         'status'                    => 'boolean',
     ];

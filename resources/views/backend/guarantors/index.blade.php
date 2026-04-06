@@ -51,6 +51,7 @@
                                         <th>អត្តសញ្ញាណប័ណ្ណ</th>
                                         <th>លេខទូរស័ព្ទ</th>
                                         <th>ធានាអតិថិជន</th>
+                                        <th>ចំណូល ($)</th>
                                         <th>ទំនាក់ទំនង</th>
                                         <th>ស្ថានភាព</th>
                                         <th class="text-center">សកម្មភាព</th>
@@ -70,6 +71,7 @@
                                                    -
                                                 @endif
                                             </td>
+                                            <td><strong>${{ number_format($guarantor->income, 2) }}</strong></td>
                                             <td>{{ $guarantor->relationship ?? 'N/A' }}</td>
                                             <td>
                                                 @if($guarantor->status == 'active')

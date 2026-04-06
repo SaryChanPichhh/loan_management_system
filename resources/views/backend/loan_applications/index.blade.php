@@ -58,6 +58,8 @@
                                         <th>ផលិតផល</th>
                                         <th>ទំហំប្រាក់ស្នើ</th>
                                         <th>រយៈពេល</th>
+                                        <th>ថ្ងៃចាប់ផ្តើម</th>
+                                        <th>ថ្ងៃបញ្ចប់</th>
                                         <th>ស្ថានភាព</th>
                                         <th class="text-center">សកម្មភាព</th>
                                     </tr>
@@ -76,6 +78,8 @@
                                             <td>{{ $application->product ? $application->product->name : '-' }}</td>
                                             <td>${{ number_format($application->requested_amount, 2) }}</td>
                                             <td>{{ $application->requested_months }} ខែ</td>
+                                            <td>{{ $application->start_date ? $application->start_date->format('d/m/Y') : '-' }}</td>
+                                            <td>{{ $application->end_date ? $application->end_date->format('d/m/Y') : '-' }}</td>
                                             <td>{!! $application->status_badge_html !!}</td>
                                             <td class="text-center">
                                                 <div class="btn-group" role="group">

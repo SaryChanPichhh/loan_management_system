@@ -12,6 +12,7 @@ class Guarantor extends Model
         'national_id',
         'phone',
         'address',
+        'income',
         'relationship',
         'document_path',
         'status',

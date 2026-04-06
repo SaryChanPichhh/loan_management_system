@@ -81,7 +81,7 @@
                             </div>
                             <div class="col-md-3">
                                 <p class="text-muted mb-0">Grace Period End</p>
-                                <p>{{ optional($loan->grace_period_end_date)->format('d/m/Y') ?? '—' }}</p>
+                                <p>{{ $loan->grace_days ? $loan->grace_days . ' ថ្ងៃ' : '—' }}</p>
                             </div>
                             <div class="col-md-3">
                                 <p class="text-muted mb-0">ថ្ងៃទូទាត់ដំបូង</p>

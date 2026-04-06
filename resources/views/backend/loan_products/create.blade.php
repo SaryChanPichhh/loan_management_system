@@ -278,17 +278,17 @@
                         </div>
                         <div class="card-body">
                             <div class="form-group">
-                                <label>ត្រូវការអ្នកធានាពី ($) <span class="required-star">*</span></label>
+                                <label>មេគុណចំណូលអ្នកធានា (Multiplier) <span class="required-star">*</span></label>
                                 <div class="input-group">
-                                    <div class="input-group-prepend"><span class="input-group-text">$</span></div>
-                                    <input type="number" name="requires_guarantor_above" step="0.01" min="0"
-                                           class="form-control @error('requires_guarantor_above') is-invalid @enderror"
-                                           value="{{ old('requires_guarantor_above', 500) }}">
-                                    @error('requires_guarantor_above')
+                                    <input type="number" name="guarantor_income_multiplier" step="0.1" min="0"
+                                           class="form-control @error('guarantor_income_multiplier') is-invalid @enderror"
+                                           value="{{ old('guarantor_income_multiplier', 1.5) }}">
+                                    <div class="input-group-append"><span class="input-group-text">ដង</span></div>
+                                    @error('guarantor_income_multiplier')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-                                <small class="input-hint">ចំនួនខ្ចីលើសពីនេះ ត្រូវការអ្នកធានា</small>
+                                <small class="input-hint">ឧទាហរណ៍៖ 1.5 ដងនៃប្រាក់ត្រូវបង់</small>
                             </div>
                             <div class="form-group">
                                 <label>ត្រូវការទ្រព្យធានាពី ($) <span class="required-star">*</span></label>

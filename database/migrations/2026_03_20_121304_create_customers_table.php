@@ -13,15 +13,27 @@ return new class extends Migration
     {
         Schema::create('customers', function (Blueprint $table) {
             $table->id();
-            $table->string('code')->unique(); // លេខកូដ
-            $table->string('name'); // ឈ្មោះអតិថិជន
-            $table->enum('gender', ['Male', 'Female']); // ភេទ
-            $table->string('phone');
+            $table->string('code')->unique();
+            $table->string('name');
+            $table->enum('gender', ['Male', 'Female', 'Other'])->default('Male');
+            $table->string('phone', 30);
+            $table->string('email')->nullable();
             $table->string('address')->nullable();
-            $table->string('type'); // ប្រភេទ
-            $table->boolean('status')->default(1); // ស្ថានភាព
-            $table->string('document')->nullable(); // ឯកសារ (file)
+            $table->string('national_id', 50)->nullable();
+            $table->date('date_of_birth')->nullable();
+            $table->boolean('age_verified')->default(0);
+            $table->string('occupation')->nullable();
+            $table->decimal('monthly_income', 18, 2)->nullable();
+            $table->boolean('has_existing_loan')->default(0);
+            $table->smallInteger('credit_score')->nullable();
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->string('type', 50);
+            $table->boolean('status')->default(1);
+            $table->string('document_path')->nullable();
             $table->timestamps();
+            $table->softDeletes();
+
+            $table->foreign('created_by')->references('id')->on('users')->onDelete('set null');
         });
     }
 

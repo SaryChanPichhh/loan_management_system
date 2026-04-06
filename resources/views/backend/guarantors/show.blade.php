@@ -51,6 +51,10 @@
                                     <td>{{ $guarantor->address ?? 'N/A' }}</td>
                                 </tr>
                                 <tr>
+                                    <td class="text-muted">ចំណូលប្រចាំខែ</td>
+                                    <td><strong>${{ number_format($guarantor->income, 2) }}</strong></td>
+                                </tr>
+                                <tr>
                                     <td class="text-muted">ទំនាក់ទំនងជាមួយអតិថិជន</td>
                                     <td>{{ $guarantor->relationship ?? 'N/A' }}</td>
                                 </tr>

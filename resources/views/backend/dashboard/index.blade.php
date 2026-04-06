@@ -26,70 +26,260 @@
             </div>
         </div>
         <div class="container-fluid">
-            <div class="card-group">
-                <div class="card border-right">
-                    <div class="card-body">
-                        <div class="d-flex d-lg-flex d-md-block align-items-center">
-                            <div>
-                                <div class="d-inline-flex align-items-center">
-                                    <h2 class="text-dark mb-1 font-weight-medium">236</h2>
-                                    <span
-                                        class="badge bg-primary font-12 text-white font-weight-medium badge-pill ml-2 d-lg-block d-md-none">កំពុងដំណើរការ</span>
+            {{-- ═══════════════════════════════════════════════════════════════
+                 LIVE SUMMARY STAT CARDS
+            ════════════════════════════════════════════════════════════════ --}}
+            <div class="row mb-4">
+
+                {{-- Active Loans (blue) --}}
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="card border-left border-primary shadow-sm h-100">
+                        <div class="card-body py-3">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <p class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                        Active Loans
+                                    </p>
+                                    <h2 class="mb-0 font-weight-bold text-dark">
+                                        {{ number_format($totalActiveLoans) }}
+                                    </h2>
+                                    <small class="text-muted">Currently disbursed</small>
                                 </div>
-                                <h6 class="text-muted font-weight-normal mb-0 w-100 text-truncate">កម្ចីសរុប</h6>
-                            </div>
-                            <div class="ml-auto mt-md-3 mt-lg-0">
-                                <span class="opacity-7 text-muted"><i data-feather="file-text"></i></span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card border-right">
-                    <div class="card-body">
-                        <div class="d-flex d-lg-flex d-md-block align-items-center">
-                            <div>
-                                <h2 class="text-dark mb-1 w-100 text-truncate font-weight-medium"><sup
-                                        class="set-doller">$</sup>1,850,306</h2>
-                                <h6 class="text-muted font-weight-normal mb-0 w-100 text-truncate">សរុបទឹកប្រាក់កម្ចីដែលបានបញ្ចេញ
-                                </h6>
-                            </div>
-                            <div class="ml-auto mt-md-3 mt-lg-0">
-                                <span class="opacity-7 text-muted"><i data-feather="dollar-sign"></i></span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card border-right">
-                    <div class="card-body">
-                        <div class="d-flex d-lg-flex d-md-block align-items-center">
-                            <div>
-                                <div class="d-inline-flex align-items-center">
-                                    <h2 class="text-dark mb-1 font-weight-medium">38</h2>
-                                    <span
-                                        class="badge bg-danger font-12 text-white font-weight-medium badge-pill ml-2 d-md-none d-lg-block">ហួសកំណត់</span>
+                                <div class="ml-3">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center"
+                                         style="width:52px;height:52px;background:rgba(95,118,232,.12);">
+                                        <i data-feather="credit-card" style="color:#5f76e8;width:24px;height:24px;"></i>
+                                    </div>
                                 </div>
-                                <h6 class="text-muted font-weight-normal mb-0 w-100 text-truncate">ការបង់ប្រាក់យឺតយ៉ាវ</h6>
-                            </div>
-                            <div class="ml-auto mt-md-3 mt-lg-0">
-                                <span class="opacity-7 text-muted"><i data-feather="alert-circle"></i></span>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="card">
-                    <div class="card-body">
-                        <div class="d-flex d-lg-flex d-md-block align-items-center">
-                            <div>
-                                <h2 class="text-dark mb-1 font-weight-medium">164</h2>
-                                <h6 class="text-muted font-weight-normal mb-0 w-100 text-truncate">អ្នកខ្ចីសរុប</h6>
-                            </div>
-                            <div class="ml-auto mt-md-3 mt-lg-0">
-                                <span class="opacity-7 text-muted"><i data-feather="users"></i></span>
+
+                {{-- Outstanding Balance (orange) --}}
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="card border-left border-warning shadow-sm h-100">
+                        <div class="card-body py-3">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <p class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                        Outstanding Balance
+                                    </p>
+                                    <h2 class="mb-0 font-weight-bold text-dark">
+                                        ${{ number_format($totalOutstandingBalance, 2) }}
+                                    </h2>
+                                    <small class="text-muted">Total receivable</small>
+                                </div>
+                                <div class="ml-3">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center"
+                                         style="width:52px;height:52px;background:rgba(255,193,7,.12);">
+                                        <i data-feather="dollar-sign" style="color:#ffc107;width:24px;height:24px;"></i>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+
+                {{-- Collected This Month (green) --}}
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="card border-left border-success shadow-sm h-100">
+                        <div class="card-body py-3">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <p class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                        Collected This Month
+                                    </p>
+                                    <h2 class="mb-0 font-weight-bold text-dark">
+                                        ${{ number_format($totalCollectedThisMonth, 2) }}
+                                    </h2>
+                                    <small class="text-muted">Completed repayments</small>
+                                </div>
+                                <div class="ml-3">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center"
+                                         style="width:52px;height:52px;background:rgba(40,167,69,.12);">
+                                        <i data-feather="trending-up" style="color:#28a745;width:24px;height:24px;"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Overdue Loans (red) — links to loans index filtered by overdue --}}
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <a href="{{ route('loans.index', ['status' => 'overdue']) }}"
+                       class="text-decoration-none">
+                        <div class="card border-left border-danger shadow-sm h-100">
+                            <div class="card-body py-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-grow-1">
+                                        <p class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                            Overdue Loans
+                                        </p>
+                                        <h2 class="mb-0 font-weight-bold text-dark">
+                                            <i data-feather="alert-triangle"
+                                               style="color:#dc3545;width:20px;height:20px;vertical-align:middle;margin-right:4px;"></i>
+                                            {{ number_format($overdueCount) }}
+                                        </h2>
+                                        <small class="text-muted">Days past due &gt; 0</small>
+                                    </div>
+                                    <div class="ml-3">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center"
+                                             style="width:52px;height:52px;background:rgba(220,53,69,.12);">
+                                            <i data-feather="alert-circle" style="color:#dc3545;width:24px;height:24px;"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+            </div>{{-- /stat cards row --}}
+
+            {{-- ═══════════════════════════════════════════════════════════════
+                 RECENT REPAYMENTS  &  DUE IN 7 DAYS — side-by-side
+            ════════════════════════════════════════════════════════════════ --}}
+            <div class="row">
+
+                {{-- Recent Repayments --}}
+                <div class="col-lg-6 mb-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header d-flex align-items-center justify-content-between py-3"
+                             style="background:#fff;border-bottom:1px solid #eef0f2;">
+                            <h5 class="mb-0 font-weight-semibold text-dark">
+                                <i data-feather="refresh-cw" style="width:16px;height:16px;margin-right:6px;color:#5f76e8;"></i>
+                                Recent Repayments
+                            </h5>
+                            <span class="badge badge-pill badge-light text-muted" style="font-size:.75rem;">
+                                Last 5
+                            </span>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0" style="font-size:.85rem;">
+                                    <thead style="background:#f8f9fa;">
+                                        <tr>
+                                            <th class="border-0 py-2 pl-3">Customer</th>
+                                            <th class="border-0 py-2 text-right">Amount</th>
+                                            <th class="border-0 py-2">Date</th>
+                                            <th class="border-0 py-2">Method</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($recentRepayments as $repayment)
+                                            <tr>
+                                                <td class="py-2 pl-3">
+                                                    <span class="font-weight-medium text-dark">
+                                                        {{ $repayment->loan->customer->name ?? '—' }}
+                                                    </span>
+                                                </td>
+                                                <td class="py-2 text-right font-weight-medium text-success">
+                                                    ${{ number_format($repayment->amount, 2) }}
+                                                </td>
+                                                <td class="py-2 text-muted">
+                                                    {{ $repayment->payment_date
+                                                        ? $repayment->payment_date->format('d M Y')
+                                                        : '—' }}
+                                                </td>
+                                                <td class="py-2">
+                                                    <span class="badge badge-pill badge-light text-muted">
+                                                        {{ ucfirst($repayment->payment_method ?? '—') }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="4" class="text-center text-muted py-4">
+                                                    <i data-feather="inbox" style="width:20px;height:20px;"></i>
+                                                    No repayments recorded yet.
+                                                </td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Due in 7 Days --}}
+                <div class="col-lg-6 mb-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header d-flex align-items-center justify-content-between py-3"
+                             style="background:#fff;border-bottom:1px solid #eef0f2;">
+                            <h5 class="mb-0 font-weight-semibold text-dark">
+                                <i data-feather="calendar" style="width:16px;height:16px;margin-right:6px;color:#ff6b35;"></i>
+                                Due in Next 7 Days
+                            </h5>
+                            <span class="badge badge-pill badge-warning text-white" style="font-size:.75rem;">
+                                Pending
+                            </span>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0" style="font-size:.85rem;">
+                                    <thead style="background:#f8f9fa;">
+                                        <tr>
+                                            <th class="border-0 py-2 pl-3">Customer</th>
+                                            <th class="border-0 py-2">Loan Code</th>
+                                            <th class="border-0 py-2">Due Date</th>
+                                            <th class="border-0 py-2 text-right">Amount Due</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($upcomingDue as $schedule)
+                                            <tr>
+                                                <td class="py-2 pl-3">
+                                                    <span class="font-weight-medium text-dark">
+                                                        {{ $schedule->loan->customer->name ?? '—' }}
+                                                    </span>
+                                                </td>
+                                                <td class="py-2">
+                                                    <a href="{{ route('loans.show', $schedule->loan_id) }}"
+                                                       class="text-primary font-weight-medium">
+                                                        {{ $schedule->loan->loan_code ?? '—' }}
+                                                    </a>
+                                                </td>
+                                                <td class="py-2">
+                                                    @php
+                                                        $daysLeft = now()->startOfDay()->diffInDays(
+                                                            \Carbon\Carbon::parse($schedule->due_date)->startOfDay(),
+                                                            false
+                                                        );
+                                                    @endphp
+                                                    <span class="{{ $daysLeft <= 2 ? 'text-danger font-weight-bold' : 'text-muted' }}">
+                                                        {{ \Carbon\Carbon::parse($schedule->due_date)->format('d M Y') }}
+                                                    </span>
+                                                    @if($daysLeft === 0)
+                                                        <span class="badge badge-danger badge-pill ml-1" style="font-size:.7rem;">Today</span>
+                                                    @elseif($daysLeft === 1)
+                                                        <span class="badge badge-warning badge-pill ml-1" style="font-size:.7rem;">Tomorrow</span>
+                                                    @endif
+                                                </td>
+                                                <td class="py-2 text-right font-weight-medium text-warning">
+                                                    ${{ number_format($schedule->amount_due, 2) }}
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="4" class="text-center text-muted py-4">
+                                                    <i data-feather="check-circle" style="width:20px;height:20px;color:#28a745;"></i>
+                                                    No payments due in the next 7 days.
+                                                </td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>{{-- /tables row --}}
+
+            {{-- Charts (kept below) --}}
             <div class="row">
                 <div class="col-lg-12">
                     <div class="card">
@@ -120,7 +310,6 @@
                 </div>
             </div>
         </div>
-    </div>
     </div>
 
 @endsection

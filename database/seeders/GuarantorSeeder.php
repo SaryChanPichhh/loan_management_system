@@ -28,6 +28,7 @@ class GuarantorSeeder extends Seeder
                 'address' => 'ផ្ទះលេខ ' . rand(1, 100) . ', ខេត្ត/ក្រុង ' . $addresses[$i],
                 'relationship' => $relations[$i],
                 'document_path' => 'guarantors/docs/id_' . rand(100, 999) . '.pdf',
+                'income' => rand(100, 1000),
                 'status' => 'active',
                 'created_at' => now(),
                 'updated_at' => now(),

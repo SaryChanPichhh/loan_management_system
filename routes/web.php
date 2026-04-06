@@ -19,19 +19,26 @@ use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
+| Frontend / Public Homepage
+|--------------------------------------------------------------------------
+*/
+Route::get('/', [HomeController::class, 'index'])->name('home');
+
+/*
+|--------------------------------------------------------------------------
 | Auth
 |--------------------------------------------------------------------------
 */
 
 Route::controller(AuthController::class)->group(function () {
-    Route::get('/login', 'login')->name('login.index');
-    Route::post('/login', 'store_login')->name('login.store');
-    Route::get('/forgot-password', 'forgot_password')->name('login.forgot_password');
-    Route::get('/logup', 'logup')->name('logup.index');
-    Route::post('/logup', 'store_logup')->name('logup.store');
+    Route::get('/admin/v1/login', 'login')->name('login.index');
+    Route::post('/admin/v1/login', 'store_login')->name('login.store');
+    Route::get('/admin/v1/forgot-password', 'forgot_password')->name('login.forgot_password');
+    Route::get('/admin/v1/logup', 'logup')->name('logup.index');
+    Route::post('/admin/v1/logup', 'store_logup')->name('logup.store');
 });
 
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
+Route::post('/admin/v1/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
 Route::middleware(['auth', 'permission'])->group(function () {
 
@@ -41,8 +48,8 @@ Route::middleware(['auth', 'permission'])->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::controller(DashboardController::class)->group(function () {
-        Route::get('/', 'index')->name('dashboard.index');
-        Route::get('/dashboard', 'index')->name('dashboard.index');
+        Route::get('/admin/v1/', 'index')->name('dashboard.index');
+        Route::get('/admin/v1/dashboard', 'index')->name('dashboard.index');
     });
 
     /*
@@ -51,13 +58,13 @@ Route::middleware(['auth', 'permission'])->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::controller(CustomerController::class)->group(function () {
-        Route::get('/customer', 'index')->name('customer.index');
-        Route::get('/customer/create', 'create')->name('customer.create');
-        Route::post('/customer', 'store')->name('customer.store');
-        Route::get('/customer/show/{customer}', 'show')->name('customer.show');
-        Route::get('/customer/edit/{customer}', 'edit')->name('customer.edit');
-        Route::put('/customer/{customer}', 'update')->name('customer.update');
-        Route::delete('/customer/{customer}', 'destroy')->name('customer.destroy');
+        Route::get('/admin/v1/customer', 'index')->name('customer.index');
+        Route::get('/admin/v1/customer/create', 'create')->name('customer.create');
+        Route::post('/admin/v1/customer', 'store')->name('customer.store');
+        Route::get('/admin/v1/customer/show/{customer}', 'show')->name('customer.show');
+        Route::get('/admin/v1/customer/edit/{customer}', 'edit')->name('customer.edit');
+        Route::put('/admin/v1/customer/{customer}', 'update')->name('customer.update');
+        Route::delete('/admin/v1/customer/{customer}', 'destroy')->name('customer.destroy');
     });
 
 /*
@@ -66,21 +73,26 @@ Route::middleware(['auth', 'permission'])->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::controller(LoanController::class)->group(function () {
-    Route::get('/loans', 'index')->name('loans.index');
-    Route::get('/loans/create', 'create')->name('loans.create');
-    Route::post('/loans', 'store')->name('loans.store');
-    Route::get('/loans/defaulted', 'defaulted')->name('loans.defaulted');
-    Route::get('/loans/customer-eligibility', 'checkCustomerEligibility')->name('loans.customer_eligibility');
-    Route::get('/loans/{id}', 'show')->name('loans.show');
-    Route::get('/loans/edit/{id}', 'edit')->name('loans.edit');
-    Route::put('/loans/{id}', 'update')->name('loans.update');
-    Route::delete('/loans/{id}', 'destroy')->name('loans.destroy');
-    Route::post('/loans/{id}/submit-review', 'submitForReview')->name('loans.submit_review');
-    Route::get('/loans/review/{id}', 'review')->name('loans.review');
-    Route::post('/loans/{id}/approve', 'approve')->name('loans.approve');
-    Route::post('/loans/{id}/reject', 'reject')->name('loans.reject');
-    Route::post('/loans/{id}/disburse', 'disburse')->name('loans.disburse');
-    Route::get('/loans/payments/{id}', 'payments')->name('loans.payments');
+    Route::get('/admin/v1/loans', 'index')->name('loans.index');
+    Route::get('/admin/v1/loans/create', 'create')->name('loans.create');
+    Route::post('/admin/v1/loans', 'store')->name('loans.store');
+    Route::get('/admin/v1/loans/defaulted', 'defaulted')->name('loans.defaulted');
+    Route::get('/admin/v1/loans/customer-eligibility', 'checkCustomerEligibility')->name('loans.customer_eligibility');
+    Route::get('/admin/v1/loans/{id}', 'show')->name('loans.show');
+    Route::get('/admin/v1/loans/edit/{id}', 'edit')->name('loans.edit');
+    Route::put('/admin/v1/loans/{id}', 'update')->name('loans.update');
+    Route::delete('/admin/v1/loans/{id}', 'destroy')->name('loans.destroy');
+    Route::post('/admin/v1/loans/{id}/submit-review', 'submitForReview')->name('loans.submit_review');
+    Route::get('/admin/v1/loans/review/{id}', 'review')->name('loans.review');
+    Route::post('/admin/v1/loans/{id}/approve', 'approve')->name('loans.approve');
+    Route::post('/admin/v1/loans/{id}/reject', 'reject')->name('loans.reject');
+    Route::get('/admin/v1/loans/{id}/disburse', 'showDisburseForm')->name('loans.disburse.form');
+    Route::post('/admin/v1/loans/{id}/disburse', 'disburse')->name('loans.disburse');
+    Route::post('/admin/v1/loans/{id}/early-settle', 'earlySettle')->name('loans.early_settle');
+    Route::post('/admin/v1/loans/{id}/mark-default', 'markDefault')->name('loans.mark_default');
+    Route::post('/admin/v1/loans/{id}/write-off', 'writeOff')->name('loans.write_off');
+    Route::get('/admin/v1/loans/payments/{id}', 'payments')->name('loans.payments');
+    Route::get('/admin/v1/loans/{id}/schedule/print', 'printSchedule')->name('loans.schedule.print');
 });
 
     /*
@@ -89,12 +101,13 @@ Route::controller(LoanController::class)->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::controller(RepaymentController::class)->group(function () {
-        Route::get('/repayments', 'index')->name('repayments.index');
-        Route::post('/repayments/store', 'store')->name('repayments.store');
-        Route::get('/repayments/overdue', 'overdue')->name('repayments.overdue');
-        Route::get('/repayments/loan/{id}', 'show')->name('repayments.show');
-        Route::get('/repayments/create/{loan_id}', 'create')->name('repayments.create');
-        Route::get('/repayments/{id}/edit', 'edit')->name('repayments.edit');
+        Route::get('/admin/v1/repayments', 'index')->name('repayments.index');
+        Route::get('/admin/v1/repayments/overdue', 'overdue')->name('repayments.overdue');
+        Route::get('/admin/v1/repayments/loan/{id}', 'show')->name('repayments.show');
+        Route::get('/admin/v1/repayments/create/{loan_id}', 'create')->name('repayments.create');
+        Route::post('/admin/v1/repayments/{loan_id}/store', 'store')->name('repayments.store');
+        Route::get('/admin/v1/repayments/{id}/edit', 'edit')->name('repayments.edit');
+        Route::get('/admin/v1/repayments/{id}/receipt', 'receipt')->name('repayments.receipt');
     });
 
     /*
@@ -103,7 +116,7 @@ Route::controller(LoanController::class)->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::controller(ReportController::class)->group(function () {
-        Route::get('/report', 'index')->name('report.index');
+        Route::get('/admin/v1/report', 'index')->name('report.index');
     });
 
     /*
@@ -112,10 +125,10 @@ Route::controller(LoanController::class)->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::controller(NotificationController::class)->group(function () {
-        Route::get('/notification', 'index')->name('notification.index');
-        Route::get('/notification/create', 'create')->name('notification.create');
-        Route::post('/notification', 'store')->name('notification.store');
-        Route::delete('/notification/{notification}', 'destroy')->name('notification.destroy');
+        Route::get('/admin/v1/notification', 'index')->name('notification.index');
+        Route::get('/admin/v1/notification/create', 'create')->name('notification.create');
+        Route::post('/admin/v1/notification', 'store')->name('notification.store');
+        Route::delete('/admin/v1/notification/{notification}', 'destroy')->name('notification.destroy');
     });
 
     /*
@@ -124,19 +137,19 @@ Route::controller(LoanController::class)->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::controller(RoleController::class)->group(function () {
-        Route::get('/roles', 'index')->name('role.index');
-        Route::post('/roles/{id}/permissions', 'updatePermissions')->name('role.permissions.update');
-        Route::get('/users/{id}/permissions/edit', 'editUserPermissions')->name('user.permissions.edit');
-        Route::post('/users/{id}/permissions', 'updateUserPermissions')->name('user.permissions.update');
+        Route::get('/admin/v1/roles', 'index')->name('role.index');
+        Route::post('/admin/v1/roles/{id}/permissions', 'updatePermissions')->name('role.permissions.update');
+        Route::get('/admin/v1/users/{id}/permissions/edit', 'editUserPermissions')->name('user.permissions.edit');
+        Route::post('/admin/v1/users/{id}/permissions', 'updateUserPermissions')->name('user.permissions.update');
     });
 
     Route::controller(PermissionController::class)->group(function () {
-        Route::get('/permissions', 'index')->name('permission.index');
-        Route::get('/permissions/create', 'create')->name('permission.create');
-        Route::post('/permissions', 'store')->name('permission.store');
-        Route::get('/permissions/{permission}/edit', 'edit')->name('permission.edit');
-        Route::put('/permissions/{permission}', 'update')->name('permission.update');
-        Route::delete('/permissions/{permission}', 'destroy')->name('permission.destroy');
+        Route::get('/admin/v1/permissions', 'index')->name('permission.index');
+        Route::get('/admin/v1/permissions/create', 'create')->name('permission.create');
+        Route::post('/admin/v1/permissions', 'store')->name('permission.store');
+        Route::get('/admin/v1/permissions/{permission}/edit', 'edit')->name('permission.edit');
+        Route::put('/admin/v1/permissions/{permission}', 'update')->name('permission.update');
+        Route::delete('/admin/v1/permissions/{permission}', 'destroy')->name('permission.destroy');
     });
 
     /*
@@ -145,8 +158,8 @@ Route::controller(LoanController::class)->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::controller(\App\Http\Controllers\Backend\ProfileController::class)->group(function () {
-        Route::get('/profile', 'edit')->name('profile.edit');
-        Route::put('/profile', 'update')->name('profile.update');
+        Route::get('/admin/v1/profile', 'edit')->name('profile.edit');
+        Route::put('/admin/v1/profile', 'update')->name('profile.update');
     });
 
     /*
@@ -155,7 +168,7 @@ Route::controller(LoanController::class)->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::controller(ActivityLogController::class)->group(function () {
-        Route::get('/activity-log', 'index')->name('activity_log.index');
+        Route::get('/admin/v1/activity-log', 'index')->name('activity_log.index');
     });
 
     /*
@@ -164,13 +177,13 @@ Route::controller(LoanController::class)->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::controller(SettingController::class)->group(function () {
-        Route::get('/settings/company-profile', 'company_profile')->name('settings.company_profile');
-        Route::get('/settings/exchange-rate', 'exchange_rate')->name('settings.exchange_rate');
-        Route::get('/settings/exchange-rate/insert', 'exchange_rate_insert')->name('settings.exchange_rate.insert');
-        Route::post('/settings/exchange-rate/store', 'exchange_rate_store')->name('settings.exchange_rate.store');
-        Route::get('/settings/exchange-rate/edit/{id}', 'exchange_rate_edit')->name('settings.exchange_rate.edit');
-        Route::put('/settings/exchange-rate/update/{id}', 'exchange_rate_update')->name('settings.exchange_rate.update');
-        Route::delete('/settings/exchange-rate/delete/{id}', 'exchange_rate_delete')->name('settings.exchange_rate.delete');
+        Route::get('/admin/v1/settings/company-profile', 'company_profile')->name('settings.company_profile');
+        Route::get('/admin/v1/settings/exchange-rate', 'exchange_rate')->name('settings.exchange_rate');
+        Route::get('/admin/v1/settings/exchange-rate/insert', 'exchange_rate_insert')->name('settings.exchange_rate.insert');
+        Route::post('/admin/v1/settings/exchange-rate/store', 'exchange_rate_store')->name('settings.exchange_rate.store');
+        Route::get('/admin/v1/settings/exchange-rate/edit/{id}', 'exchange_rate_edit')->name('settings.exchange_rate.edit');
+        Route::put('/admin/v1/settings/exchange-rate/update/{id}', 'exchange_rate_update')->name('settings.exchange_rate.update');
+        Route::delete('/admin/v1/settings/exchange-rate/delete/{id}', 'exchange_rate_delete')->name('settings.exchange_rate.delete');
     });
 });
 
@@ -180,14 +193,14 @@ Route::controller(LoanController::class)->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::controller(LoanProductController::class)->group(function () {
-    Route::get('/loan-products', 'index')->name('loan_products.index');
-    Route::get('/loan-products/create', 'create')->name('loan_products.create');
-    Route::post('/loan-products', 'store')->name('loan_products.store');
-    Route::get('/loan-products/{loanProduct}', 'show')->name('loan_products.show');
-    Route::get('/loan-products/edit/{loanProduct}', 'edit')->name('loan_products.edit');
-    Route::put('/loan-products/{loanProduct}', 'update')->name('loan_products.update');
-    Route::delete('/loan-products/{loanProduct}', 'destroy')->name('loan_products.destroy');
-    Route::post('/loan-products/{loanProduct}/toggle-status', 'toggleStatus')->name('loan_products.toggle_status');
+    Route::get('/admin/v1/loan-products', 'index')->name('loan_products.index');
+    Route::get('/admin/v1/loan-products/create', 'create')->name('loan_products.create');
+    Route::post('/admin/v1/loan-products', 'store')->name('loan_products.store');
+    Route::get('/admin/v1/loan-products/{loanProduct}', 'show')->name('loan_products.show');
+    Route::get('/admin/v1/loan-products/edit/{loanProduct}', 'edit')->name('loan_products.edit');
+    Route::put('/admin/v1/loan-products/{loanProduct}', 'update')->name('loan_products.update');
+    Route::delete('/admin/v1/loan-products/{loanProduct}', 'destroy')->name('loan_products.destroy');
+    Route::post('/admin/v1/loan-products/{loanProduct}/toggle-status', 'toggleStatus')->name('loan_products.toggle_status');
 });
 
 /*
@@ -196,13 +209,13 @@ Route::controller(LoanProductController::class)->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::controller(GuarantorController::class)->group(function () {
-    Route::get('/guarantors', 'index')->name('guarantors.index');
-    Route::get('/guarantors/create', 'create')->name('guarantors.create');
-    Route::post('/guarantors', 'store')->name('guarantors.store');
-    Route::get('/guarantors/{id}', 'show')->name('guarantors.show');
-    Route::get('/guarantors/edit/{id}', 'edit')->name('guarantors.edit');
-    Route::put('/guarantors/{id}', 'update')->name('guarantors.update');
-    Route::delete('/guarantors/{id}', 'destroy')->name('guarantors.destroy');
+    Route::get('/admin/v1/guarantors', 'index')->name('guarantors.index');
+    Route::get('/admin/v1/guarantors/create', 'create')->name('guarantors.create');
+    Route::post('/admin/v1/guarantors', 'store')->name('guarantors.store');
+    Route::get('/admin/v1/guarantors/{id}', 'show')->name('guarantors.show');
+    Route::get('/admin/v1/guarantors/edit/{id}', 'edit')->name('guarantors.edit');
+    Route::put('/admin/v1/guarantors/{id}', 'update')->name('guarantors.update');
+    Route::delete('/admin/v1/guarantors/{id}', 'destroy')->name('guarantors.destroy');
 });
 
 /*
@@ -211,12 +224,12 @@ Route::controller(GuarantorController::class)->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::controller(LoanApplicationController::class)->group(function () {
-    Route::get('/loan-applications', 'index')->name('loan_applications.index');
-    Route::get('/loan-applications/create', 'create')->name('loan_applications.create');
-    Route::post('/loan-applications', 'store')->name('loan_applications.store');
-    Route::get('/loan-applications/{id}', 'show')->name('loan_applications.show');
-    Route::get('/loan-applications/edit/{id}', 'edit')->name('loan_applications.edit');
-    Route::put('/loan-applications/{id}', 'update')->name('loan_applications.update');
-    Route::delete('/loan-applications/{id}', 'destroy')->name('loan_applications.destroy');
-    Route::post('/loan-applications/{id}/status', 'updateStatus')->name('loan_applications.update_status');
+    Route::get('/admin/v1/loan-applications', 'index')->name('loan_applications.index');
+    Route::get('/admin/v1/loan-applications/create', 'create')->name('loan_applications.create');
+    Route::post('/admin/v1/loan-applications', 'store')->name('loan_applications.store');
+    Route::get('/admin/v1/loan-applications/{id}', 'show')->name('loan_applications.show');
+    Route::get('/admin/v1/loan-applications/edit/{id}', 'edit')->name('loan_applications.edit');
+    Route::put('/admin/v1/loan-applications/{id}', 'update')->name('loan_applications.update');
+    Route::delete('/admin/v1/loan-applications/{id}', 'destroy')->name('loan_applications.destroy');
+    Route::post('/admin/v1/loan-applications/{id}/status', 'updateStatus')->name('loan_applications.update_status');
 });

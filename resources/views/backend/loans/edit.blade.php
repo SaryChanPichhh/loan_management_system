@@ -86,20 +86,12 @@
                         </div>
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-md-6">
+                                <div class="col-md-12">
                                     <div class="form-group">
                                         <label for="edit_principal_amount">ចំនួនទឹកប្រាក់កម្ចី ($) <span class="text-danger">*</span></label>
                                         <input type="number" class="form-control" id="edit_principal_amount"
                                                name="principal_amount" min="0" step="0.01"
                                                value="{{ old('principal_amount', $loan->principal_amount) }}" required />
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="edit_disbursed_amount">ចំនួនបានចាញ់ ($)</label>
-                                        <input type="number" class="form-control" id="edit_disbursed_amount"
-                                               name="disbursed_amount" min="0" step="0.01"
-                                               value="{{ old('disbursed_amount', $loan->disbursed_amount) }}" />
                                     </div>
                                 </div>
                             </div>
@@ -149,9 +141,9 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label>Grace Period End (Auto)</label>
-                                        <input type="date" class="form-control bg-light" id="edit_grace_end"
-                                               readonly value="{{ optional($loan->grace_period_end_date)->toDateString() }}" />
+                                        <label>ចំនួនថ្ងៃ Grace (Auto)</label>
+                                        <input type="text" class="form-control bg-light" id="edit_grace_end"
+                                               readonly value="{{ $loan->grace_days ? $loan->grace_days . ' ថ្ងៃ' : '' }}" />
                                     </div>
                                 </div>
                                 <div class="col-md-6">

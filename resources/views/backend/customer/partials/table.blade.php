@@ -3,7 +3,15 @@
         <td>{{ $key + 1 }}</td>
         <td>{{ $c->code }}</td>
         <td>{{ $c->name }}</td>
-        <td>{{ $c->gender == 'Male' ? 'ប្រុស' : 'ស្រី' }}</td>
+        <td>
+            @if($c->gender == 'Male')
+                ប្រុស
+            @elseif($c->gender == 'Female')
+                ស្រី
+            @else
+                ផ្សេងៗ
+            @endif
+        </td>
         <td>{{ $c->phone }}</td>
         <td>{{ $c->address }}</td>
         <td>{{ $c->type }}</td>
@@ -17,12 +25,12 @@
         </td>
 
         <td class="text-center">
-            @if($c->document)
+            @if($c->document_path)
                 <i class="fas fa-download text-primary"
                    style="cursor:pointer;"
                    data-toggle="modal"
                    data-target="#imageModal"
-                   data-image="{{ asset('uploads/'.$c->document) }}">
+                   data-image="{{ asset('uploads/'.$c->document_path) }}">
                 </i>
             @endif
         </td>

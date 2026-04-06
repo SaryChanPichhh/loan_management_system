@@ -79,10 +79,18 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group">
+                                            <label>ចំណូលប្រចាំខែ ($)</label>
+                                            <input type="number" step="0.01" name="income" class="form-control" value="{{ old('income', $guarantor->income) }}" placeholder="0.00">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
                                             <label>ទំនាក់ទំនងជាមួយអ្នកខ្ចី</label>
                                             <input type="text" name="relationship" class="form-control" value="{{ old('relationship', $guarantor->relationship) }}" placeholder="ឧ. បងប្អូនកូនបង្កើត">
                                         </div>
                                     </div>
+                                </div>
+                                <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label>ស្ថានភាព <span class="text-danger">*</span></label>
@@ -93,8 +101,6 @@
                                             </select>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label>ឯកសារភ្ជាប់ (រូបភាព ឬ PDF)</label>

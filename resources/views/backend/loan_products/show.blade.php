@@ -144,8 +144,8 @@
                         <hr>
 
                         <div class="mb-3">
-                            <div class="detail-label">កម្រិតតម្រូវឱ្យមានអ្នកធានា</div>
-                            <div class="detail-value">កម្ចីលើសពី <span class="text-danger">${{ number_format($loanProduct->requires_guarantor_above, 2) }}</span></div>
+                            <div class="detail-label">មេគុណចំណូលអ្នកធានា</div>
+                            <div class="detail-value"><span class="text-danger">{{ number_format($loanProduct->guarantor_income_multiplier, 2) }}</span> ដងនៃប្រាក់សងប្រចាំខែ</div>
                         </div>
 
                         <hr>

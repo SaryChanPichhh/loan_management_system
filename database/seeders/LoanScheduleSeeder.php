@@ -34,7 +34,7 @@ class LoanScheduleSeeder extends Seeder
                     'late_fee_due' => 0,
                     'amount_paid' => $paid_amount,
                     'paid_date' => $status === 'paid' ? now()->addMonths($j)->subDays(1) : null,
-                    'is_grace_period' => false,
+                    'grace_period_end_date' => now()->addMonths($j)->addDays(3)->format('Y-m-d'),
                     'status' => $status,
                     'created_at' => now(),
                     'updated_at' => now(),

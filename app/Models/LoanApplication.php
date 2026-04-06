@@ -18,13 +18,17 @@ class LoanApplication extends Model
         'reviewed_at',
         'rejection_reason',
         'loan_id',
-        'created_by'
+        'created_by',
+        'start_date',
+        'end_date',
     ];
 
     protected $casts = [
         'requested_amount' => 'decimal:2',
         'requested_months' => 'integer',
         'reviewed_at' => 'datetime',
+        'start_date' => 'date',
+        'end_date' => 'date',
     ];
 
     public function customer()

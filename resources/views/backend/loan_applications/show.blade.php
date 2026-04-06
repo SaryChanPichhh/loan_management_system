@@ -73,6 +73,18 @@
                                     <td class="text-muted">ស្ថានភាពបច្ចុប្បន្ន</td>
                                     <td>{!! $application->status_badge_html !!}</td>
                                 </tr>
+                                @if($application->start_date)
+                                <tr>
+                                    <td class="text-muted">ថ្ងៃចាប់ផ្តើម</td>
+                                    <td><strong>{{ $application->start_date->format('d/m/Y') }}</strong></td>
+                                </tr>
+                                @endif
+                                @if($application->end_date)
+                                <tr>
+                                    <td class="text-muted">ថ្ងៃបញ្ចប់</td>
+                                    <td><strong>{{ $application->end_date->format('d/m/Y') }}</strong></td>
+                                </tr>
+                                @endif
                                 @if($application->status == 'rejected')
                                 <tr>
                                     <td class="text-muted">មូលហេតុបដិសេធ</td>
@@ -123,6 +135,18 @@
                                     <div class="form-group">
                                         <label>រយៈពេលអនុម័ត * (ខែ)</label>
                                         <input type="number" name="approved_months" class="form-control" value="{{ $application->requested_months }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>កាលបរិច្ឆេទអនុម័ត (Approved Date) *</label>
+                                        <input type="date" name="start_date" class="form-control" value="{{ $application->start_date ? $application->start_date->format('Y-m-d') : date('Y-m-d') }}" min="{{ date('Y-m-01') }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>ថ្ងៃបញ្ចប់ *</label>
+                                        <input type="date" name="end_date" class="form-control" value="{{ date('Y-m-d', strtotime('+'.$application->requested_months.' months')) }}" readonly>
                                     </div>
                                 </div>
                             </div>
@@ -191,6 +215,8 @@
         var reasonTextarea = reasonDiv.querySelector('textarea');
         var amountInput = approvalDiv.querySelector('input[name="approved_amount"]');
         var monthsInput = approvalDiv.querySelector('input[name="approved_months"]');
+        var startDateInput = approvalDiv.querySelector('input[name="start_date"]');
+        var endDateInput = approvalDiv.querySelector('input[name="end_date"]');
         
         // Handle Rejection Logic
         if (status === 'rejected') {
@@ -200,17 +226,48 @@
             reasonDiv.classList.add('d-none');
             reasonTextarea.removeAttribute('required');
         }
-
+ 
         // Handle Approval Logic
         if (status === 'approved') {
             approvalDiv.classList.remove('d-none');
             amountInput.setAttribute('required', 'required');
             monthsInput.setAttribute('required', 'required');
+            startDateInput.setAttribute('required', 'required');
+            endDateInput.setAttribute('required', 'required');
         } else {
             approvalDiv.classList.add('d-none');
             amountInput.removeAttribute('required');
             monthsInput.removeAttribute('required');
+            startDateInput.removeAttribute('required');
+            endDateInput.removeAttribute('required');
         }
     }
+
+    function updateEndDateApproval() {
+        var startDate = document.querySelector('input[name="start_date"]').value;
+        var months = parseInt(document.querySelector('input[name="approved_months"]').value);
+        var endDateInput = document.querySelector('input[name="end_date"]');
+        
+        if (startDate && !isNaN(months)) {
+            var date = new Date(startDate);
+            date.setMonth(date.getMonth() + months);
+            
+            var year = date.getFullYear();
+            var month = (date.getMonth() + 1).toString().padStart(2, '0');
+            var day = date.getDate().toString().padStart(2, '0');
+            
+            endDateInput.value = `${year}-${month}-${day}`;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var startDateInput = document.querySelector('input[name="start_date"]');
+        var monthsInput = document.querySelector('input[name="approved_months"]');
+        
+        if (startDateInput && monthsInput) {
+            startDateInput.addEventListener('change', updateEndDateApproval);
+            monthsInput.addEventListener('input', updateEndDateApproval);
+        }
+    });
 </script>
 @endpush

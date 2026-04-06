@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Loan extends Model
@@ -34,7 +35,7 @@ class Loan extends Model
         'start_date',
         'end_date',
         'first_payment_date',
-        'grace_period_end_date',
+        'grace_days',
         'early_settlement_date',
 
         // Flags
@@ -60,7 +61,7 @@ class Loan extends Model
         'start_date'          => 'date',
         'end_date'            => 'date',
         'first_payment_date'  => 'date',
-        'grace_period_end_date' => 'date',
+        'grace_days' => 'integer',
         'early_settlement_date' => 'date',
     ];
 
@@ -104,6 +105,11 @@ class Loan extends Model
     public function repayments(): HasMany
     {
         return $this->hasMany(Repayment::class);
+    }
+
+    public function account(): HasOne
+    {
+        return $this->hasOne(LoanAccount::class);
     }
 
     // ─── Helpers ──────────────────────────────────────────────────

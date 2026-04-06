@@ -49,6 +49,7 @@
                                     <th class="py-3 font-weight-medium text-center">វិធីបង់ប្រាក់ (Method)</th>
                                     <th class="py-3 font-weight-medium">កាលបរិច្ឆេទ (Date)</th>
                                     <th class="py-3 font-weight-medium text-center">ស្ថានភាព (Status)</th>
+                                    <th class="py-3 font-weight-medium text-center">សកម្មភាព (Actions)</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -94,10 +95,15 @@
                                             <span class="badge badge-warning text-dark rounded-pill px-3 py-1"><i data-feather="clock" class="mr-1" style="width:12px;height:12px;"></i> Pending</span>
                                         @endif
                                     </td>
+                                    <td class="py-3 text-center">
+                                        <a href="{{ route('repayments.receipt', $repayment->id) }}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3 shadow-sm">
+                                            <i data-feather="printer" style="width: 14px; height: 14px;" class="mr-1"></i> Receipt
+                                        </a>
+                                    </td>
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="7" class="text-center py-5">
+                                    <td colspan="8" class="text-center py-5">
                                         <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center mb-3 text-muted opacity-50" style="width: 60px; height: 60px;">
                                             <i data-feather="file-minus" style="width: 30px; height: 30px;"></i>
                                         </div>

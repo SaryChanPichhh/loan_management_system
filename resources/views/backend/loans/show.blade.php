@@ -21,6 +21,9 @@
             </div>
             <div class="col-5 align-self-center">
                 <div class="float-right">
+                    <a href="{{ route('loans.schedule.print', $loan->id) }}" target="_blank" class="btn btn-secondary btn-sm mr-1">
+                        <i data-feather="printer"></i> Print Schedule
+                    </a>
                     @if($loan->status === 'pending')
                         <a href="{{ route('loans.edit', $loan->id) }}" class="btn btn-warning btn-sm mr-1">
                             <i data-feather="edit"></i> កែសម្រួល
@@ -36,16 +39,25 @@
                             <i data-feather="check-circle"></i> ពិនិត្យ/អនុម័ត
                         </a>
                     @elseif($loan->status === 'approved')
-                        <form action="{{ route('loans.disburse', $loan->id) }}" method="POST" class="d-inline">
-                            @csrf
-                            <button type="submit" class="btn btn-primary btn-sm" onclick="return confirm('តើអ្នកពិតជាចង់បើកប្រាក់កម្ចីនេះមែនទេ?')">
-                                <i data-feather="dollar-sign"></i> បើកប្រាក់ (Disburse)
-                            </button>
-                        </form>
+                        <a href="{{ route('loans.disburse.form', $loan->id) }}" class="btn btn-primary btn-sm">
+                            <i data-feather="dollar-sign"></i> បើកប្រាក់ (Disburse)
+                        </a>
                     @elseif($loan->status === 'active')
                         <a href="{{ route('loans.payments', $loan->id) }}" class="btn btn-primary btn-sm">
                             <i data-feather="dollar-sign"></i> ការទូទាត់
                         </a>
+                        <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#earlySettleModal">
+                            <i data-feather="fast-forward"></i> Early Settle
+                        </button>
+                        @if($loan->account && $loan->account->days_past_due > 30)
+                            <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#markDefaultModal">
+                                <i data-feather="alert-triangle"></i> Mark Default
+                            </button>
+                        @endif
+                    @elseif($loan->status === 'defaulted')
+                        <button type="button" class="btn btn-dark btn-sm" data-toggle="modal" data-target="#writeOffModal">
+                            <i data-feather="slash"></i> Write Off
+                        </button>
                     @endif
                 </div>
             </div>
@@ -73,7 +85,7 @@
                 'under_review' => 'alert-info',
                 'approved'     => 'alert-primary',
                 'active'       => 'alert-success',
-                'completed'    => 'alert-secondary',
+                'completed'    => 'alert-success', // Requested green banner for completed
                 'rejected'     => 'alert-danger',
                 'defaulted'    => 'alert-danger',
                 'written_off'  => 'alert-dark',
@@ -81,10 +93,18 @@
             };
         @endphp
         <div class="alert {{ $bannerClass }} d-flex align-items-center mb-3">
-            <span class="badge {{ $loan->statusBadge() }} mr-2" style="font-size:1rem;">{{ $loan->statusLabel() }}</span>
-            <span>{{ $loan->loan_code }}</span>
+            @if($loan->status === 'completed')
+                <i data-feather="check-circle" class="mr-2 text-success font-weight-bold" style="width:24px; height:24px;"></i>
+                <span class="badge badge-success mr-2" style="font-size:1rem;">Loan Completed</span>
+            @else
+                <span class="badge {{ $loan->statusBadge() }} mr-2" style="font-size:1rem;">{{ $loan->statusLabel() }}</span>
+            @endif
+            <strong class="mx-2">{{ $loan->loan_code }}</strong>
             @if($loan->application)
                 <span class="ml-3 text-muted"><small>ពីសំណើ: {{ $loan->application->application_code }}</small></span>
+            @endif
+            @if($loan->status === 'defaulted')
+                <span class="ml-auto badge badge-warning text-dark"><i data-feather="alert-circle" class="mr-1" style="width:14px;"></i> Guarantor Contacted / Legal Proceeding</span>
             @endif
         </div>
 
@@ -142,12 +162,26 @@
                             </div>
                             <div class="col-md-3">
                                 <p class="text-muted mb-0">Grace Period End</p>
-                                <p>{{ optional($loan->grace_period_end_date)->format('d/m/Y') ?? '—' }}</p>
+                                <p>{{ $loan->grace_days ? $loan->grace_days . ' ថ្ងៃ' : '—' }}</p>
                             </div>
                             <div class="col-md-3">
                                 <p class="text-muted mb-0">ថ្ងៃទូទាត់ដំបូង</p>
                                 <p>{{ optional($loan->first_payment_date)->format('d/m/Y') ?? '—' }}</p>
                             </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-3">
+                                <p class="text-muted mb-0">ថ្ងៃបញ្ចប់ (End Date)</p>
+                                <p class="font-weight-bold {{ $loan->status === 'completed' ? 'text-success' : '' }}">
+                                    {{ optional($loan->end_date)->format('d/m/Y') ?? '—' }}
+                                </p>
+                            </div>
+                            @if($loan->early_settlement_date)
+                            <div class="col-md-4">
+                                <p class="text-muted mb-0">បង់ផ្តាច់មុនកំណត់</p>
+                                <p class="badge badge-warning text-dark">{{ \Carbon\Carbon::parse($loan->early_settlement_date)->format('d/m/Y') }}</p>
+                            </div>
+                            @endif
                         </div>
                         <div class="row">
                             <div class="col-md-3">
@@ -165,6 +199,11 @@
                                 <p>
                                     @if($loan->collateral_required)
                                         <span class="badge badge-warning">បាទ</span>
+                                        @if($loan->status === 'completed')
+                                            <span class="badge badge-info ml-1">Released</span>
+                                        @elseif($loan->status === 'written_off')
+                                            <span class="badge badge-dark ml-1">Seized</span>
+                                        @endif
                                     @else
                                         <span class="badge badge-light">ទេ</span>
                                     @endif
@@ -249,7 +288,15 @@
                             <p class="text-muted mb-1"><small><strong>អ្នកធានា</strong></small></p>
                             @foreach($guarantors as $g)
                                 <div class="d-flex align-items-center mb-1">
-                                    <span class="badge {{ $g->status === 'active' ? 'badge-success' : 'badge-secondary' }} mr-2">{{ $g->status }}</span>
+                                    @php
+                                        $badgeColor = match($g->status) {
+                                            'active' => 'badge-success',
+                                            'released' => 'badge-info',
+                                            'defaulted' => 'badge-danger',
+                                            default => 'badge-secondary'
+                                        };
+                                    @endphp
+                                    <span class="badge {{ $badgeColor }} mr-2">{{ ucfirst($g->status) }}</span>
                                     <span>{{ $g->full_name }}</span>
                                     @if(!$g->document_path)
                                         <span class="badge badge-danger ml-2">គ្មានឯកសារ</span>
@@ -272,16 +319,21 @@
                                 <i data-feather="file-text"></i> ពិនិត្យ / អនុម័ត
                             </a>
                         @elseif($loan->status === 'approved')
-                            <form action="{{ route('loans.disburse', $loan->id) }}" method="POST">
-                                @csrf
-                                <button type="submit" class="btn btn-primary btn-block" onclick="return confirm('តើអ្នកពិតជាចង់បើកប្រាក់កម្ចីនេះមែនទេ?')">
-                                    <i data-feather="dollar-sign"></i> បើកប្រាក់ (Disburse)
-                                </button>
-                            </form>
+                            <a href="{{ route('loans.disburse.form', $loan->id) }}" class="btn btn-primary btn-block">
+                                <i data-feather="dollar-sign"></i> បើកប្រាក់ (Disburse)
+                            </a>
                         @elseif($loan->status === 'active')
-                            <a href="{{ route('loans.payments', $loan->id) }}" class="btn btn-info btn-block">
+                            <a href="{{ route('loans.payments', $loan->id) }}" class="btn btn-info btn-block mb-2">
                                 <i data-feather="dollar-sign"></i> ការទូទាត់
                             </a>
+                            <button type="button" class="btn btn-warning btn-block shadow-sm" data-toggle="modal" data-target="#earlySettleModal">
+                                <strong><i data-feather="fast-forward"></i> បង់ផ្តាច់មុន (Early Settle)</strong>
+                            </button>
+                            @if($loan->account && $loan->account->days_past_due > 30)
+                                <button type="button" class="btn btn-danger btn-block shadow-sm mt-2" data-toggle="modal" data-target="#markDefaultModal">
+                                    <strong><i data-feather="alert-triangle"></i> ចាត់ទុកជាបំណុលខូច (Mark Default)</strong>
+                                </button>
+                            @endif
                         @elseif($loan->status === 'completed')
                             <div class="alert alert-success py-2 mb-0">
                                 <i data-feather="check-circle"></i> <strong>កម្ចីបានបញ្ចប់រួចរាល់</strong>
@@ -291,9 +343,12 @@
                                 <i data-feather="x-circle"></i> <strong>បានបដិសេធ</strong>
                             </div>
                         @elseif($loan->status === 'defaulted')
-                            <div class="alert alert-warning py-2 mb-0">
-                                <i data-feather="alert-triangle"></i> <strong>Default — ទំនាក់ទំនងក្រុមការងារ</strong>
+                            <div class="alert alert-warning py-2 mb-2">
+                                <i data-feather="alert-triangle"></i> <strong>Default — តំនាកតំនងក្រុមការងារ</strong>
                             </div>
+                            <button type="button" class="btn btn-dark btn-block shadow-sm" data-toggle="modal" data-target="#writeOffModal">
+                                <strong><i data-feather="slash"></i> Write Off កម្ចី</strong>
+                            </button>
                         @elseif($loan->status === 'written_off')
                             <div class="alert alert-dark py-2 mb-0">
                                 <i data-feather="slash"></i> <strong>Written Off (ខាត)</strong>
@@ -317,27 +372,33 @@
                                 <tr>
                                     <th>#</th>
                                     <th>ថ្ងៃត្រូវបង់</th>
+                                    <th>Grace Period</th>
+                                    <th>Principal Due</th>
+                                    <th>Interest Due</th>
                                     <th>ចំនួនត្រូវបង់</th>
                                     <th>ចំនួនបានបង់</th>
                                     <th>ស្ថានភាព</th>
                                 </tr>
                                 </thead>
                                 <tbody>
-                                @foreach($loan->schedules as $i => $schedule)
+                                @foreach($loan->schedules->sortBy('installment_number') as $schedule)
                                     @php
                                         $isOverdue = $schedule->status !== 'paid' &&
-                                            \Carbon\Carbon::parse($schedule->due_date)->lt(now());
+                                            \Carbon\Carbon::parse($schedule->grace_period_end_date ?? $schedule->due_date)->lt(now());
                                     @endphp
                                     <tr class="{{ $isOverdue ? 'table-danger' : '' }}">
-                                        <td>{{ $i + 1 }}</td>
+                                        <td>{{ $schedule->installment_number ?? ($loop->index + 1) }}</td>
                                         <td>{{ $schedule->due_date }}</td>
+                                        <td>{{ $schedule->grace_period_end_date }}</td>
+                                        <td>{{ $schedule->principal_due ? '$'.number_format($schedule->principal_due, 2) : '—' }}</td>
+                                        <td>{{ $schedule->interest_due ? '$'.number_format($schedule->interest_due, 2) : '—' }}</td>
                                         <td>${{ number_format($schedule->amount_due, 2) }}</td>
                                         <td>${{ number_format($schedule->amount_paid, 2) }}</td>
                                         <td>
                                             @if($schedule->status === 'paid')
                                                 <span class="badge badge-success">បានបង់</span>
                                             @elseif($isOverdue)
-                                                <span class="badge badge-danger">ហួសកំណត់</span>
+                                                <span class="badge badge-danger">ហួសកំណត់ (Overdue)</span>
                                             @else
                                                 <span class="badge badge-warning">រង់ចាំ</span>
                                             @endif
@@ -355,6 +416,165 @@
 
     </div>
 </div>
+
+{{-- Early Settlement Modal --}}
+@if($loan->status === 'active')
+<div class="modal fade" id="earlySettleModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-warning text-dark border-0">
+                <h5 class="modal-title font-weight-bold">
+                    <i data-feather="fast-forward" class="mr-2"></i> Early Settlement (បង់ផ្តាច់)
+                </h5>
+                <button type="button" class="close text-dark" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body p-4 bg-light">
+                <div class="alert alert-info border-0 shadow-sm rounded mb-4">
+                    <i data-feather="info" class="mr-2"></i> <strong>Note:</strong> គ្មានការពិន័យ (No Penalty Applies) សម្រាប់ការបង់ផ្តាច់។
+                </div>
+                
+                <table class="table table-bordered bg-white rounded shadow-sm">
+                    <tr>
+                        <td class="text-muted">កាលបរិច្ឆេទ (Today):</td>
+                        <td class="font-weight-bold text-dark">{{ date('d/m/Y') }}</td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">ប្រាក់ត្រូវបង់ផ្តាច់ (Outstanding):</td>
+                        <td class="text-danger font-weight-bold" style="font-size: 1.25rem;">
+                            ${{ number_format($loan->account->outstanding_balance ?? 0, 2) }}
+                        </td>
+                    </tr>
+                </table>
+                <p class="text-muted text-center mt-3 mb-0" style="font-size: 0.9rem;">
+                    តើអ្នកប្រាកដថាចង់បង់ផ្តាច់កម្ចីនេះទាំងស្រុងមែនទេ?
+                </p>
+            </div>
+            <div class="modal-footer border-0 d-flex justify-content-between bg-light">
+                <button type="button" class="btn btn-secondary px-4" data-dismiss="modal">
+                    បោះបង់
+                </button>
+                <form action="{{ route('loans.early_settle', $loan->id) }}" method="POST">
+                    @csrf
+                    <button type="submit" class="btn btn-warning px-4 font-weight-bold shadow-sm">
+                        យល់ព្រមបង់ផ្តាច់
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+@endif
+
+{{-- Mark Default Modal --}}
+@if($loan->status === 'active' && $loan->account && $loan->account->days_past_due > 30)
+<div class="modal fade" id="markDefaultModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-danger text-white border-0">
+                <h5 class="modal-title font-weight-bold text-white">
+                    <i data-feather="alert-triangle" class="mr-2 text-white"></i> បញ្ជាក់ការផ្លាស់ប្តូរទៅ Default
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body p-4 bg-light">
+                <div class="alert alert-danger border-0 shadow-sm rounded mb-4">
+                    <i data-feather="alert-octagon" class="mr-2"></i> <strong>ប្រមានផ្ទាល់ទី:</strong> កម្ចីនេះមានការយឺតយ៉ាវរហូតដល់ <strong>{{ $loan->account->days_past_due }} ថ្ងៃ</strong>។ ការកំណត់វាជា Default នឹងសកម្មភាពផ្លូវច្បាប់។
+                </div>
+                
+                <p class="text-dark">
+                    ការបន្តទៅមុខនឹង:
+                </p>
+                <ul class="text-dark">
+                    <li>កំណត់ស្ថានភាពកម្ចីទៅជា <span class="badge badge-danger">Defaulted</span></li>
+                    <li>ផ្លាស់ប្តូរស្ថានភាព Guarantors ទាំងអស់ទៅជា <span class="badge badge-danger">Defaulted</span></li>
+                    <li>ជូនដំណឹងទៅដល់អ្នកគ្រប់គ្រងដើម្បីចាប់ផ្តើមនីតិវិធីផ្លូវច្បាប់</li>
+                </ul>
+                <p class="text-danger text-center mt-4 mb-0 font-weight-bold" style="font-size: 0.9rem;">
+                    តើអ្នកប្រាកដថាចង់ធ្វើប្រតិបត្តិការនេះមែនទេ? សកម្មភាពនេះមិនអាចត្រឡប់ថយក្រោយបានទេ។
+                </p>
+            </div>
+            <div class="modal-footer border-0 d-flex justify-content-between bg-light">
+                <button type="button" class="btn btn-secondary px-4" data-dismiss="modal">
+                    បោះបង់
+                </button>
+                <form action="{{ route('loans.mark_default', $loan->id) }}" method="POST">
+                    @csrf
+                    <button type="submit" class="btn btn-danger px-4 font-weight-bold shadow-sm">
+                        យល់ព្រម (Mark Default)
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+
+{{-- Write Off Modal --}}
+@if($loan->status === 'defaulted')
+<div class="modal fade" id="writeOffModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header text-white border-0" style="background:#343a40;">
+                <h5 class="modal-title font-weight-bold text-white">
+                    <i data-feather="slash" class="mr-2"></i> បញ្ជាក់ Write Off កម្ចី
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body p-4 bg-light">
+                <div class="alert alert-danger border-0 mb-3">
+                    <strong><i data-feather="alert-octagon" class="mr-1"></i> ការប្រយត្ននេះមិនអាចត្រឡប់ថយក្រោយបានទេ!</strong>
+                    កម្ចីនេះនឹងត្រូវបានដោយធ្វើប្រក័ជ្អដធ្វើឋើមនេ (Bad Debt)។ ទ្រព្យបញ្ចាំនឹងត្រូវបានរឹបអូស។
+                </div>
+
+                <table class="table table-bordered bg-white shadow-sm rounded mb-3">
+                    <tr>
+                        <td class="text-muted">ប្រាក់បំណុលខូច (Outstanding):</td>
+                        <td class="text-danger font-weight-bold" style="font-size:1.2rem;">
+                            ${{ number_format($loan->account->outstanding_balance ?? 0, 2) }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">ការទូទាត់ស្ថានភាពកំណត់:</td>
+                        <td><span class="badge badge-dark">Written Off</span></td>
+                    </tr>
+                    @if($loan->collateral_required)
+                    <tr>
+                        <td class="text-muted">ត្រភ្យបញ្ចាំ:</td>
+                        <td><span class="badge badge-dark">Seized</span></td>
+                    </tr>
+                    @endif
+                </table>
+
+                <div class="form-group mb-0">
+                    <label class="font-weight-bold text-danger">វាយបញ្ចូល <code>CONFIRM</code> ដើម្បីបញ្ជាក់:</label>
+                    <input type="text" id="writeOffConfirmInput" class="form-control"
+                           placeholder="Type CONFIRM to proceed" autocomplete="off">
+                    <small class="text-muted">សូម​វាយ​ CONFIRM (ជាអក្សរធំ) ដើម្បី​បើក​ប៊ូតុង​ commit</small>
+                </div>
+            </div>
+            <div class="modal-footer border-0 d-flex justify-content-between bg-light">
+                <button type="button" class="btn btn-secondary px-4" data-dismiss="modal">
+                    បោះបង់
+                </button>
+                <form action="{{ route('loans.write_off', $loan->id) }}" method="POST" id="writeOffForm">
+                    @csrf
+                    <button type="submit" id="writeOffSubmitBtn" class="btn btn-dark px-4 font-weight-bold shadow-sm" disabled>
+                        <i data-feather="slash"></i> យល់ព្រម Write Off
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+
 @endsection
 
 @push('scripts')
@@ -377,6 +597,20 @@
             } catch (e) { console.error(e); }
         }
         if (typeof feather !== "undefined") feather.replace();
+
+        // Write Off CONFIRM guard
+        var confirmInput = document.getElementById('writeOffConfirmInput');
+        var submitBtn   = document.getElementById('writeOffSubmitBtn');
+        if (confirmInput && submitBtn) {
+            confirmInput.addEventListener('input', function () {
+                submitBtn.disabled = this.value.trim() !== 'CONFIRM';
+            });
+        }
+        // Reset on modal close
+        $('#writeOffModal').on('hidden.bs.modal', function () {
+            if (confirmInput) confirmInput.value = '';
+            if (submitBtn)   submitBtn.disabled = true;
+        });
     });
     </script>
 @endpush

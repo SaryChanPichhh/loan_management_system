@@ -16,7 +16,7 @@
 @section('contents')
 <div class="page-wrapper">
     <div class="page-breadcrumb">
-        <div class="row">
+        <div class="row"> 
             <div class="col-7 align-self-center">
                 <h3 class="page-title text-truncate text-dark font-weight-medium mb-1 pt-2">បង្កើតកម្ចីថ្មី</h3>
                 <nav aria-label="breadcrumb">
@@ -113,6 +113,7 @@
                                             data-max-term="{{ $product->max_term_months }}"
                                             data-grace="{{ $product->grace_period_days ?? 3 }}"
                                             data-guarantor-above="{{ $product->requires_guarantor_above ?? 500 }}"
+                                            data-guarantor-multiplier="{{ $product->guarantor_income_multiplier ?? 1.5 }}"
                                             data-collateral-above="{{ $product->requires_collateral_above ?? 5000 }}"
                                             data-interest-type="{{ $product->interest_type }}"
                                             {{ (old('product_id', $application->product_id ?? '') == $product->id) ? 'selected' : '' }}>
@@ -145,7 +146,7 @@
                                 </div>
                                 <div class="row mt-2" id="threshold_row">
                                     <div class="col-md-6">
-                                        <small class="threshold-warn">⚠ Guarantor required above: $<span id="prd_guarantor_above">—</span></small>
+                                        <small class="threshold-warn">⚠ Guarantor income multiplier: <span id="prd_guarantor_multiplier">—</span>x</small>
                                     </div>
                                     <div class="col-md-6">
                                         <small class="threshold-warn">⚠ Collateral required above: $<span id="prd_collateral_above">—</span></small>
@@ -162,21 +163,13 @@
                         </div>
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-md-6">
+                                <div class="col-md-12">
                                     <div class="form-group">
                                         <label for="principal_amount">ចំនួនទឹកប្រាក់កម្ចី ($) <span class="text-danger">*</span></label>
                                         <input type="number" class="form-control" id="principal_amount" name="principal_amount"
                                                placeholder="0.00" min="0" step="0.01"
                                                value="{{ old('principal_amount', $application->requested_amount ?? '') }}" required />
                                         <small id="amount_warning" class="text-danger" style="display:none;"></small>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="disbursed_amount">ចំនួនទឹកប្រាក់បានចេញ ($)</label>
-                                        <input type="number" class="form-control" id="disbursed_amount" name="disbursed_amount"
-                                               placeholder="ស្មើនឹង Principal ប្រសិនមិនផ្លាស់ប្តូរ" min="0" step="0.01"
-                                               value="{{ old('disbursed_amount') }}" />
                                     </div>
                                 </div>
                             </div>
@@ -245,11 +238,11 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="grace_period_end_date">ថ្ងៃបញ្ចប់ Grace Period</label>
-                                        <input type="date" class="form-control bg-light" id="grace_period_end_date"
-                                               name="grace_period_end_date" readonly
-                                               value="{{ old('grace_period_end_date') }}" />
-                                        <small class="text-muted">* ចាប់ផ្តើម + Grace ថ្ងៃ</small>
+                                        <label for="grace_days">ចំនួនថ្ងៃ Grace</label>
+                                        <input type="number" class="form-control bg-light" id="grace_days"
+                                               name="grace_days" readonly
+                                               value="{{ old('grace_days') }}" />
+                                        <small class="text-muted">* Auto from Product</small>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -351,13 +344,33 @@ $(document).ready(function () {
                 html += '</ul>';
             }
             if (data.occupation) html += `<div class="check-item"><span class="dot dot-ok"></span>មុខរបរ: ${data.occupation}</div>`;
-            if (data.monthly_income) html += `<div class="check-item"><span class="dot dot-ok"></span>ចំណូល: $${parseFloat(data.monthly_income).toFixed(2)}/ខែ</div>`;
+            if (data.monthly_income) {
+                html += `<div class="check-item"><span class="dot dot-ok"></span>ចំណូល: $${parseFloat(data.monthly_income).toFixed(2)}/ខែ</div>`;
+                window.currentCustomerIncome = parseFloat(data.monthly_income);
+            } else {
+                window.currentCustomerIncome = 0;
+            }
             if (data.credit_score)   html += `<div class="check-item"><span class="dot dot-ok"></span>Credit Score: ${data.credit_score}</div>`;
             html += `<div class="check-item"><span class="dot ${data.has_document ? 'dot-ok' : 'dot-err'}"></span>ឯកសារ KYC: ${data.has_document ? 'មាន' : 'មិនមាន'}</div>`;
-            html += `<div class="check-item"><span class="dot ${data.guarantors_count > 0 ? 'dot-ok' : 'dot-na'}"></span>អ្នកធានា Active: ${data.guarantors_count} នាក់</div>`;
+
+            if (data.guarantors && data.guarantors.length > 0) {
+                html += `<div class="mt-2 text-info"><i data-feather="users" class="mr-1 mt-n1"></i>អ្នកធានាសកម្ម:</div>`;
+                html += '<ul class="list-unstyled mb-0 ml-3">';
+                data.guarantors.forEach(g => {
+                    html += `<li>- <strong>${g.full_name}</strong> (ចំណូល: $${parseFloat(g.income || 0).toFixed(2)} | ទំនង: ${g.relationship || 'N/A'})</li>`;
+                });
+                html += '</ul>';
+                window.currentGuarantors = data.guarantors;
+            } else {
+                html += `<div class="check-item mt-2"><span class="dot dot-na"></span>អ្នកធានា Active: 0 នាក់</div>`;
+                window.currentGuarantors = [];
+            }
+            html += `<div class="mt-2 text-right"><a href="/admin/v1/customers/${cid}?tab=guarantors" target="_blank" class="btn btn-sm btn-outline-primary"><i data-feather="plus" class="mr-1"></i>បន្ថែមអ្នកធានា</a></div>`;
 
             $('#eligibility_body').html(html);
             $('#eligibility_panel').show();
+            if (typeof feather !== 'undefined') feather.replace();
+            checkThresholds(); // recompute requirements
         });
     });
 
@@ -375,7 +388,7 @@ $(document).ready(function () {
         $('#prd_type').text(opt.data('interest-type'));
         $('#prd_max_term').text(opt.data('max-term'));
         $('#prd_grace').text(opt.data('grace'));
-        $('#prd_guarantor_above').text(parseFloat(opt.data('guarantor-above')).toLocaleString());
+        $('#prd_guarantor_multiplier').text(opt.data('guarantor-multiplier'));
         $('#prd_collateral_above').text(parseFloat(opt.data('collateral-above')).toLocaleString());
         $('#product_info').show();
 
@@ -432,9 +445,7 @@ $(document).ready(function () {
         const grace = parseInt($('#product_id').find(':selected').data('grace')) || 3;
         if (!start) return;
         const d = new Date(start);
-        d.setDate(d.getDate() + grace);
-        const graceEnd = d.toISOString().split('T')[0];
-        $('#grace_period_end_date').val(graceEnd);
+        $('#grace_days').val(grace);
 
         // Auto-suggest first payment as day after grace
         const fp = new Date(d);
@@ -448,29 +459,66 @@ $(document).ready(function () {
         const opt    = $('#product_id').find(':selected');
         if (!opt.val()) { $('#threshold_summary').hide(); return; }
         const amount = parseFloat($('#principal_amount').val()) || 0;
-        const gAbove = parseFloat(opt.data('guarantor-above')) || 500;
-        const cAbove = parseFloat(opt.data('collateral-above')) || 5000;
+        const months = parseInt($('#duration_months').val()) || 0;
+        const cAbove = parseFloat(opt.data('collateral-above')) || 0;
+        const gAbove = parseFloat(opt.data('guarantor-above')) || 0;
+        const multiplier = parseFloat(opt.data('guarantor-multiplier')) || 0;
+        const rate = (parseFloat(opt.data('rate')) || 0) / 100 / 12;
 
         $('#threshold_summary').show();
+        $('#guarantor_warning, #collateral_warning').hide();
 
-        if (amount > gAbove) {
-            $('#guarantor_flag').html('<span class="dot dot-err"></span><span class="text-warning">Guarantor Required</span> (ចំនួន > $' + gAbove.toLocaleString() + ')');
-            $('#guarantor_warning').show();
-            $('#guarantor_warning_text').text('ចំនួនទឹកប្រាក់លើស $' + gAbove.toLocaleString() + ' — ត្រូវការអ្នកធានា (Active + ឯកសារ)');
+        // Estimate monthly payment
+        let monthlyPayment = rate === 0 ? (amount / months) : (amount * rate * Math.pow(1 + rate, months)) / (Math.pow(1 + rate, months) - 1);
+        if (isNaN(monthlyPayment) || !isFinite(monthlyPayment)) monthlyPayment = 0;
+
+        let customerPassesIncomeRule = true;
+        if (amount >= 500) {
+            const reqCustomerIncome = monthlyPayment * 1.5;
+            if ((window.currentCustomerIncome || 0) < reqCustomerIncome) {
+                customerPassesIncomeRule = false;
+                $('#guarantor_flag').html(`<span class="dot dot-err"></span><span class="text-danger">ចំណូលអតិថិជនមិនគ្រប់គ្រាន់</span> (ត្រូវការ $${reqCustomerIncome.toFixed(2)} /ខែ)`);
+            } else {
+                $('#guarantor_flag').html(`<span class="dot dot-ok"></span><span class="text-success">ចំណូលអតិថិជនគ្រប់គ្រាន់</span>`);
+            }
+
+            if (amount <= 5000 && multiplier > 0) {
+                const reqIncome = monthlyPayment * multiplier;
+                
+                // check if has guarantor with enough income
+                let qualifiedGuarantor = false;
+                if (window.currentGuarantors && window.currentGuarantors.length > 0) {
+                    for (let g of window.currentGuarantors) {
+                        if (parseFloat(g.income || 0) >= reqIncome) {
+                            qualifiedGuarantor = true;
+                            break;
+                        }
+                    }
+                }
+                
+                if (qualifiedGuarantor) {
+                     $('#guarantor_flag').append(`<br/><span class="dot dot-ok mt-2"></span><span class="text-success">មានអ្នកធានាគ្រប់គ្រាន់</span> (ចំណូល > $${reqIncome.toFixed(2)})`);
+                } else {
+                     $('#guarantor_warning').show();
+                     $('#guarantor_warning_text').html(`<strong>ត្រូវការអ្នកធានា:</strong> ចំណូលយ៉ាងហោចណាស់ $${reqIncome.toFixed(2)} /ខែ (${multiplier} ដងនៃប្រាក់សងប្រចាំខែ)`);
+                     $('#guarantor_flag').append(`<br/><span class="dot dot-err mt-2"></span><span class="text-danger">អ្នកធានាបច្ចុប្បន្នមិនគ្រប់គ្រាន់</span>`);
+                }
+            } else if (multiplier === 0 || gAbove === 0) {
+                $('#guarantor_flag').append(`<br/><span class="dot dot-ok mt-2"></span>Guarantor: មិនតម្រូវ`);
+            }
         } else {
-            $('#guarantor_flag').html('<span class="dot dot-ok"></span>Guarantor: មិនតម្រូវ');
-            $('#guarantor_warning').hide();
+            $('#guarantor_flag').html('<span class="dot dot-ok"></span>Guarantor: មិនតម្រូវ (កម្ចីក្រោម $500)');
         }
 
-        if (amount > cAbove) {
+        if (cAbove > 0 && amount > cAbove) {
             $('#collateral_flag').html('<span class="dot dot-err"></span><span class="text-warning">Collateral Required</span> (ចំនួន > $' + cAbove.toLocaleString() + ')');
             $('#collateral_warning').show();
-            $('#collateral_warning_text').text('ចំនួនទឹកប្រាក់លើស $' + cAbove.toLocaleString() + ' — ត្រូវការទ្រព្យធានា');
+            $('#collateral_warning_text').html(`ចំនួនទឹកប្រាក់លើស $${cAbove.toLocaleString()} — <strong>ត្រូវការទ្រព្យបញ្ចាំរូបវន្ត</strong> តម្លៃយ៉ាងហោចណាស់ ${parseFloat(amount * 1.2).toLocaleString()}$`);
         } else {
             $('#collateral_flag').html('<span class="dot dot-ok"></span>Collateral: មិនតម្រូវ');
-            $('#collateral_warning').hide();
         }
     }
+
 
     function validateAgainstProduct() {
         const opt = $('#product_id').find(':selected');
