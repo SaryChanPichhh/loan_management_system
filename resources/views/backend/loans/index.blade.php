@@ -51,8 +51,6 @@
                                 @php
                                     $tabs = [
                                         null        => ['label' => 'ទាំងអស់',           'badge' => 'secondary'],
-                                        'pending'   => ['label' => 'កំពុងរង់ចាំ',      'badge' => 'warning'],
-                                        'under_review' => ['label' => 'កំពុងពិនិត្យ', 'badge' => 'info'],
                                         'approved'  => ['label' => 'បានអនុម័ត',        'badge' => 'primary'],
                                         'active'    => ['label' => 'កំពុងដំណើរការ',    'badge' => 'success'],
                                         'overdue'   => ['label' => 'ហួសកំណត់ (Overdue)','badge' => 'danger'],
@@ -121,7 +119,7 @@
                                                        class="btn btn-sm btn-info" title="មើលព័ត៌មាន">
                                                         <i data-feather="eye"></i>
                                                     </a>
-                                                    @if($loan->status === 'pending')
+                                                    @if($loan->status === 'approved')
                                                         <a href="{{ route('loans.edit', $loan->id) }}"
                                                            class="btn btn-sm btn-warning" title="កែសម្រួល">
                                                             <i data-feather="edit"></i>

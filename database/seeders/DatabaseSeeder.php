@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class DatabaseSeeder extends Seeder
 {
@@ -17,9 +18,32 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::beginTransaction();
-
         try {
+            DB::statement('SET FOREIGN_KEY_CHECKS=0');
+            foreach ([
+                'loan_collateral_docs',
+                'loan_documents',
+                'transactions',
+                'repayments',
+                'loan_fees',
+                'loan_collaterals',
+                'loan_disbursements',
+                'loan_schedules',
+                'loan_accounts',
+                'guarantors',
+                'loans',
+                'loan_applications',
+                'customers',
+                'notifications',
+                'activity_logs',
+                'exchange_rates',
+            ] as $table) {
+                if (Schema::hasTable($table)) {
+                    DB::table($table)->truncate();
+                }
+            }
+            DB::statement('SET FOREIGN_KEY_CHECKS=1');
+
             // Prevent duplicate user creation
             if (User::where('email', 'test@example.com')->doesntExist()) {
                 User::factory()->create([
@@ -31,6 +55,7 @@ class DatabaseSeeder extends Seeder
             $this->call([
                 // Role & Permission (PK/FK) should seed early so auth IDs exist for other seeders that may rely on them.
                 RolePermissionSeeder::class,
+                UserSeeder::class,
 
                 CustomerSeeder::class,
                 ExchangeRateSeeder::class,
@@ -56,9 +81,8 @@ class DatabaseSeeder extends Seeder
                 RepaymentSeeder::class,
             ]);
 
-            DB::commit();
         } catch (\Throwable $e) {
-            DB::rollBack();
+            DB::statement('SET FOREIGN_KEY_CHECKS=1');
 
             // Optional: log error
             logger()->error($e);

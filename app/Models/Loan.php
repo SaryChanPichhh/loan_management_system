@@ -120,8 +120,6 @@ class Loan extends Model
     public function statusLabel(): string
     {
         return match ($this->status) {
-            'pending'      => 'កំពុងរង់ចាំ',
-            'under_review' => 'កំពុងពិនិត្យ',
             'approved'     => 'បានអនុម័ត',
             'rejected'     => 'បដិសេធ',
             'active'       => 'កំពុងដំណើរការ',
@@ -138,8 +136,6 @@ class Loan extends Model
     public function statusBadge(): string
     {
         return match ($this->status) {
-            'pending'      => 'badge-warning',
-            'under_review' => 'badge-info',
             'approved'     => 'badge-primary',
             'rejected'     => 'badge-danger',
             'active'       => 'badge-success',

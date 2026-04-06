@@ -4,30 +4,44 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Faker\Factory as Faker;
 
 class LoanAccountSeeder extends Seeder
 {
     public function run(): void
     {
-        $loans = DB::table('loans')->pluck('id')->toArray();
-        if (empty($loans)) $loans = [1, 2, 3, 4, 5];
-        
-        // Ensure unique loan IDs and limit to 5
-        $loans = array_slice($loans, 0, 5);
+        $faker = Faker::create('en_US');
+        $loans = DB::table('loans')->get(['id', 'principal_amount', 'disbursed_amount', 'status']);
+        if ($loans->isEmpty()) {
+            return;
+        }
 
         $data = [];
-        foreach ($loans as $i => $loanId) {
+        foreach ($loans as $i => $loan) {
+            $paidRatio = match ($loan->status) {
+                'completed' => $faker->randomFloat(4, 0.95, 1.00),
+                'active', 'approved' => $faker->randomFloat(4, 0.10, 0.75),
+                'defaulted', 'written_off' => $faker->randomFloat(4, 0.05, 0.45),
+                default => $faker->randomFloat(4, 0.00, 0.30),
+            };
+            $principalPaid = round($loan->principal_amount * $paidRatio, 2);
+            $outstanding = max(0, round($loan->principal_amount - $principalPaid, 2));
+
             $data[] = [
-                'loan_id' => $loanId,
+                'loan_id' => $loan->id,
                 'account_number' => 'ACC-' . date('Y') . '-' . str_pad($i + 1, 5, '0', STR_PAD_LEFT),
-                'outstanding_balance' => rand(500, 5000),
-                'total_principal_paid' => rand(100, 1000),
-                'total_interest_paid' => rand(50, 200),
-                'total_penalty_paid' => 0,
-                'total_late_fee_paid' => 0,
-                'overdue_amount' => 0,
-                'days_past_due' => rand(0, 5),
-                'last_payment_at' => now()->subDays(rand(1, 30)),
+                'outstanding_balance' => $outstanding,
+                'total_principal_paid' => $principalPaid,
+                'total_interest_paid' => round($principalPaid * $faker->randomFloat(4, 0.03, 0.18), 2),
+                'total_penalty_paid' => round($faker->randomFloat(2, 0, 120), 2),
+                'total_late_fee_paid' => round($faker->randomFloat(2, 0, 60), 2),
+                'overdue_amount' => in_array($loan->status, ['defaulted', 'written_off'], true)
+                    ? round($outstanding * $faker->randomFloat(4, 0.20, 0.65), 2)
+                    : 0,
+                'days_past_due' => in_array($loan->status, ['defaulted', 'written_off'], true)
+                    ? $faker->numberBetween(15, 180)
+                    : $faker->numberBetween(0, 12),
+                'last_payment_at' => now()->subDays($faker->numberBetween(1, 120)),
                 'created_at' => now(),
                 'updated_at' => now(),
             ];

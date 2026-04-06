@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Faker\Factory as Faker;
 
 class LoanSeeder extends Seeder
@@ -13,46 +12,71 @@ class LoanSeeder extends Seeder
     {
         $faker = Faker::create();
         
-        $applications = DB::table('loan_applications')->pluck('id')->toArray();
-        $customers = DB::table('customers')->pluck('id')->toArray();
-        $products = DB::table('loan_products')->pluck('id')->toArray();
+        $approvedApplications = DB::table('loan_applications')
+            ->where('status', 'approved')
+            ->get(['id', 'customer_id', 'product_id']);
         $users = DB::table('users')->pluck('id')->toArray();
-        $userId = !empty($users) ? $users[0] : 1;
 
-        if (empty($applications) || empty($customers) || empty($products)) {
+        if ($approvedApplications->isEmpty()) {
             return;
         }
 
+        $statuses = ['approved', 'active', 'completed', 'defaulted', 'written_off', 'rejected'];
         $data = [];
-        for ($i = 1; $i <= 5; $i++) {
+        $applicationIdsForLink = [];
+        $sequence = 1;
+
+        foreach ($approvedApplications as $application) {
+            $duration = $faker->numberBetween(6, 72);
+            $principal = $faker->randomFloat(2, 1000, 100000);
+            $disbursed = round($principal * $faker->randomFloat(4, 0.82, 1), 2);
+            $status = $faker->randomElement($statuses);
+            $startDate = $faker->dateTimeBetween('-2 years', '-2 months');
+            $firstPayment = (clone $startDate)->modify('+1 month');
+            $endDate = (clone $startDate)->modify('+' . $duration . ' months');
+            $isRejected = $status === 'rejected';
+            $isApprovedState = in_array($status, ['approved', 'active', 'completed', 'defaulted', 'written_off'], true);
+            $reviewer = !empty($users) ? $users[array_rand($users)] : null;
+
             $data[] = [
-                'loan_code' => 'L-' . str_pad($i, 5, '0', STR_PAD_LEFT),
-                'application_id' => $faker->randomElement($applications),
-                'customer_id' => $faker->randomElement($customers),
-                'product_id' => $faker->randomElement($products),
-                'principal_amount' => $faker->randomFloat(2, 1000, 50000),
-                'disbursed_amount' => $faker->randomFloat(2, 1000, 50000),
+                'loan_code' => 'L-' . str_pad((string) $sequence, 6, '0', STR_PAD_LEFT),
+                'application_id' => $application->id,
+                'customer_id' => $application->customer_id,
+                'product_id' => $application->product_id,
+                'principal_amount' => $principal,
+                'disbursed_amount' => $disbursed,
                 'interest_rate' => $faker->randomFloat(2, 1, 15),
-                'duration_months' => $faker->numberBetween(6, 60),
-                'status' => $faker->randomElement(['approved', 'pending', 'rejected', 'active']),
+                'duration_months' => $duration,
+                'status' => $status,
                 'purpose' => $faker->sentence(),
-                'start_date' => $faker->date('Y-m-d'),
-                'end_date' => $faker->date('Y-m-d', '+1 year'),
+                'start_date' => $startDate->format('Y-m-d'),
+                'end_date' => $endDate->format('Y-m-d'),
                 'note' => $faker->sentence(),
-                'first_payment_date' => $faker->date('Y-m-d', '+1 month'),
+                'first_payment_date' => $firstPayment->format('Y-m-d'),
                 'grace_days' => $faker->numberBetween(3, 7),
                 'collateral_required' => $faker->boolean(),
                 'guarantor_required' => $faker->boolean(),
                 'early_settlement_date' => null,
-                'approved_by' => $userId,
-                'rejected_by' => null,
-                'rejected_reason' => null,
-                'created_by' => $userId,
+                'approved_by' => $isApprovedState ? $reviewer : null,
+                'rejected_by' => $isRejected ? $reviewer : null,
+                'rejected_reason' => $isRejected ? $faker->sentence(8) : null,
+                'created_by' => $reviewer,
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
+
+            $applicationIdsForLink[] = $application->id;
+            $sequence++;
         }
 
         DB::table('loans')->insert($data);
+
+        // Connect approved applications to the created loan records.
+        DB::table('loan_applications')
+            ->whereIn('id', $applicationIdsForLink)
+            ->update([
+                'loan_id' => DB::raw('(SELECT id FROM loans WHERE loans.application_id = loan_applications.id LIMIT 1)'),
+                'updated_at' => now(),
+            ]);
     }
 }

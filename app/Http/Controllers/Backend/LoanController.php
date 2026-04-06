@@ -353,9 +353,9 @@ class LoanController extends Controller
     {
         $loan = Loan::with(['customer', 'product'])->findOrFail($id);
 
-        if ($loan->status !== 'pending') {
+        if ($loan->status !== 'approved') {
             return redirect()->route('loans.show', $loan->id)
-                ->with('error', 'អាចកែសម្រួលបានតែនៅពេលស្ថានភាព pending ប៉ុណ្ណោះ');
+                ->with('error', 'អាចកែសម្រួលបានតែនៅពេលស្ថានភាព approved ប៉ុណ្ណោះ');
         }
 
         $customers = Customer::where('status', 1)->whereNull('deleted_at')->get();
@@ -372,9 +372,9 @@ class LoanController extends Controller
     {
         $loan = Loan::findOrFail($id);
 
-        if ($loan->status !== 'pending') {
+        if ($loan->status !== 'approved') {
             return redirect()->route('loans.show', $loan->id)
-                ->with('error', 'អាចកែសម្រួលបានតែនៅពេលស្ថានភាព pending ប៉ុណ្ណោះ');
+                ->with('error', 'អាចកែសម្រួលបានតែនៅពេលស្ថានភាព approved ប៉ុណ្ណោះ');
         }
 
         $request->validate([
@@ -462,21 +462,6 @@ class LoanController extends Controller
         ));
     }
 
-    // ─────────────────────────────────────────────────────────────────
-    // SUBMIT FOR REVIEW
-    // ─────────────────────────────────────────────────────────────────
-
-    public function submitForReview($id)
-    {
-        $loan = Loan::findOrFail($id);
-        if ($loan->status !== 'pending') {
-            return redirect()->back()->with('error', 'កម្ចីនេះមិនអាចដាក់ស្នើសុំពិនិត្យបានទេ (មានតែ pending ប៉ុណ្ណោះ)');
-        }
-
-        $loan->update(['status' => 'under_review']);
-
-        return redirect()->back()->with('success', 'កម្ចីត្រូវបានដាក់ស្នើសុំពិនិត្យរួចរាល់');
-    }
 
     // ─────────────────────────────────────────────────────────────────
     // APPROVE
