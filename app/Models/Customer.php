@@ -27,6 +27,7 @@ class Customer extends Model
         'type',
         'status',
         'document_path',
+        'profile',
         'created_by',
     ];
 

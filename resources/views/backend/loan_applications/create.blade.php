@@ -263,20 +263,15 @@
             if (amount < 500) {
                 if (customerPassesIncomeRule) reqPanel.removeClass('alert-warning alert-danger').addClass('alert-info');
                 reqList.append('<li><strong>ក្រោម $500:</strong> មិនតម្រូវឲ្យមានទ្រព្យបញ្ចាំ ឬអ្នកធានាឡើយ។ (No collateral needed)</li>');
-            } else if (amount >= 500 && amount <= 5000) {
+            } else if (amount >= 500) {
                 if (customerPassesIncomeRule) reqPanel.removeClass('alert-info alert-danger').addClass('alert-warning');
                 if (multiplier > 0) {
                     const reqIncome = monthlyPayment * multiplier;
-                    reqList.append(`<li><strong>$500 – $5,000:</strong> តម្រូវឲ្យមានអ្នកធានា (Guarantor required)</li>`);
+                    reqList.append(`<li><strong>ចាប់ពី $500 ឡើងទៅ:</strong> តម្រូវឲ្យមានអ្នកធានា (Guarantor required)</li>`);
                     reqList.append(`<li>ចំណូលអ្នកធានាត្រូវមានយ៉ាងហោចណាស់: <strong class="text-danger">$${reqIncome.toFixed(2)} /ខែ</strong> (${multiplier} ដងនៃប្រាក់សងសរុប)</li>`);
                 } else {
-                    reqList.append(`<li><strong>$500 – $5,000:</strong> មិនតម្រូវឲ្យមានអ្នកធានាសម្រាប់ផលិតផលនេះទេ (មេគុណ = 0)</li>`);
+                    reqList.append(`<li><strong>ចាប់ពី $500 ឡើងទៅ:</strong> មិនតម្រូវឲ្យមានអ្នកធានាសម្រាប់ផលិតផលនេះទេ (មេគុណ = 0)</li>`);
                 }
-            } else if (amount > 5000) {
-                if (customerPassesIncomeRule) reqPanel.removeClass('alert-info alert-warning').addClass('alert-danger');
-                const reqCollateralValue = amount * 1.2;
-                reqList.append(`<li><strong>លើសពី $5,000:</strong> តម្រូវឲ្យមានទ្រព្យបញ្ចាំរូបវន្ត (Physical collateral required)</li>`);
-                reqList.append(`<li>តម្លៃទ្រព្យបញ្ចាំត្រូវមានយ៉ាងហោចណាស់: <strong class="text-danger">$${reqCollateralValue.toFixed(2)}</strong> (១២០% នៃទំហំកម្ចី)</li>`);
             }
         }
 

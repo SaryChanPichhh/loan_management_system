@@ -15,6 +15,8 @@ class Guarantor extends Model
         'income',
         'relationship',
         'document_path',
+        'guarantor_profile',
+        'guarantor_document',
         'status',
     ];
 

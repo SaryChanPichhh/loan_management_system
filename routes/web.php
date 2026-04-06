@@ -14,6 +14,7 @@ use App\Http\Controllers\Backend\SettingController;
 use App\Http\Controllers\Backend\LoanProductController;
 use App\Http\Controllers\Backend\GuarantorController;
 use App\Http\Controllers\Backend\LoanApplicationController;
+use App\Http\Controllers\Backend\LoanCollateralController;
 use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 
@@ -94,6 +95,21 @@ Route::controller(LoanController::class)->group(function () {
     Route::get('/admin/v1/loans/payments/{id}', 'payments')->name('loans.payments');
     Route::get('/admin/v1/loans/{id}/schedule/print', 'printSchedule')->name('loans.schedule.print');
 });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Loan Collaterals
+    |--------------------------------------------------------------------------
+    */
+    Route::controller(LoanCollateralController::class)->group(function () {
+        Route::get('/admin/v1/loans/{loan}/collaterals',                'index')      ->name('loans.collaterals.index');
+        Route::post('/admin/v1/loans/{loan}/collaterals',               'store')      ->name('loans.collaterals.store');
+        Route::put('/admin/v1/loans/{loan}/collaterals/{collateral}',   'update')     ->name('loans.collaterals.update');
+        Route::delete('/admin/v1/loans/{loan}/collaterals/{collateral}','destroy')    ->name('loans.collaterals.destroy');
+        Route::post('/admin/v1/collaterals/{collateral}/docs',          'uploadDoc')  ->name('loans.collaterals.docs.upload');
+        Route::delete('/admin/v1/collaterals/docs/{doc}',               'deleteDoc')  ->name('loans.collaterals.docs.delete');
+        Route::get('/admin/v1/collaterals/docs/{doc}/download',         'downloadDoc')->name('loans.collaterals.docs.download');
+    });
 
     /*
     |--------------------------------------------------------------------------
@@ -185,7 +201,6 @@ Route::controller(LoanController::class)->group(function () {
         Route::put('/admin/v1/settings/exchange-rate/update/{id}', 'exchange_rate_update')->name('settings.exchange_rate.update');
         Route::delete('/admin/v1/settings/exchange-rate/delete/{id}', 'exchange_rate_delete')->name('settings.exchange_rate.delete');
     });
-});
 
 /*
 |--------------------------------------------------------------------------
@@ -232,4 +247,6 @@ Route::controller(LoanApplicationController::class)->group(function () {
     Route::put('/admin/v1/loan-applications/{id}', 'update')->name('loan_applications.update');
     Route::delete('/admin/v1/loan-applications/{id}', 'destroy')->name('loan_applications.destroy');
     Route::post('/admin/v1/loan-applications/{id}/status', 'updateStatus')->name('loan_applications.update_status');
+});
+
 });

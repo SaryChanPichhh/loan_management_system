@@ -32,15 +32,23 @@ class GuarantorController extends Controller
             'address' => 'nullable|string',
             'income' => 'nullable|numeric|min:0',
             'relationship' => 'nullable|string|max:100',
-            'document' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:2048',
+            'guarantor_profile' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'document_path' => 'nullable|file|mimes:docx,pdf|max:2048',
             'status' => 'required|in:active,released,defaulted',
         ]);
 
-        $data = $request->except('document');
+        $data = $request->except(['guarantor_profile', 'document_path']);
 
-        if ($request->hasFile('document')) {
-            $path = $request->file('document')->store('guarantor_documents', 'public');
-            $data['document_path'] = $path;
+        if ($request->hasFile('guarantor_profile')) {
+            $profileName = time() . '_profile.' . $request->file('guarantor_profile')->extension();
+            $request->file('guarantor_profile')->move(public_path('guarantor_profile'), $profileName);
+            $data['guarantor_profile'] = $profileName;
+        }
+
+        if ($request->hasFile('document_path')) {
+            $docName = time() . '_doc.' . $request->file('document_path')->extension();
+            $request->file('document_path')->move(public_path('guarantor_document'), $docName);
+            $data['document_path'] = $docName;
         }
 
         Guarantor::create($data);
@@ -57,7 +65,7 @@ class GuarantorController extends Controller
     public function edit($id)
     {
         $guarantor = Guarantor::findOrFail($id);
-        $customers = Customer::where('status', 'active')->get();
+        $customers = Customer::where('status', 1)->get();
         return view('backend.guarantors.edit', compact('guarantor', 'customers'));
     }
 
@@ -73,18 +81,31 @@ class GuarantorController extends Controller
             'address' => 'nullable|string',
             'income' => 'nullable|numeric|min:0',
             'relationship' => 'nullable|string|max:100',
-            'document' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:2048',
+            'guarantor_profile' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'document_path' => 'nullable|file|mimes:docx,pdf|max:2048',
             'status' => 'required|in:active,released,defaulted',
         ]);
 
-        $data = $request->except('document');
+        $data = $request->except(['guarantor_profile', 'document_path']);
 
-        if ($request->hasFile('document')) {
-            if ($guarantor->document_path && Storage::disk('public')->exists($guarantor->document_path)) {
-                Storage::disk('public')->delete($guarantor->document_path);
+        if ($request->hasFile('guarantor_profile')) {
+            // Delete old profile if exists
+            if ($guarantor->guarantor_profile && file_exists(public_path('guarantor_profile/' . $guarantor->guarantor_profile))) {
+                unlink(public_path('guarantor_profile/' . $guarantor->guarantor_profile));
             }
-            $path = $request->file('document')->store('guarantor_documents', 'public');
-            $data['document_path'] = $path;
+            $profileName = time() . '_profile.' . $request->file('guarantor_profile')->extension();
+            $request->file('guarantor_profile')->move(public_path('guarantor_profile'), $profileName);
+            $data['guarantor_profile'] = $profileName;
+        }
+
+        if ($request->hasFile('document_path')) {
+            // Delete old document if exists
+            if ($guarantor->document_path && file_exists(public_path('guarantor_document/' . $guarantor->document_path))) {
+                unlink(public_path('guarantor_document/' . $guarantor->document_path));
+            }
+            $docName = time() . '_doc.' . $request->file('document_path')->extension();
+            $request->file('document_path')->move(public_path('guarantor_document'), $docName);
+            $data['document_path'] = $docName;
         }
 
         $guarantor->update($data);

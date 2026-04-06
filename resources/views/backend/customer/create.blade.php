@@ -56,8 +56,8 @@
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="code">លេខកូដ <span class="text-danger">*</span></label>
-                                                <input type="text" id="code" name="code" class="form-control @error('code') is-invalid @enderror" value="{{ old('code') }}" placeholder="បញ្ចូលលេខកូដ">
+                                                <label for="code">លេខកូដ <span class="text-danger small">(បង្កើតដោយស្វ័យប្រវត្តិ)</span></label>
+                                                <input type="text" id="code" name="code" class="form-control bg-light @error('code') is-invalid @enderror" value="{{ $generatedCode }}" readonly>
                                                 @error('code')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                             </div>
                                         </div>
@@ -112,7 +112,11 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="type">ប្រភេទ <span class="text-danger">*</span></label>
-                                                <input type="text" id="type" name="type" class="form-control @error('type') is-invalid @enderror" value="{{ old('type') }}" placeholder="បញ្ចូលប្រភេទអតិថិជន">
+                                                <select id="type" name="type" class="form-control custom-select @error('type') is-invalid @enderror">
+                                                    <option value="">ជ្រើសរើសប្រភេទ</option>
+                                                    <option value="individual" {{ old('type') == 'individual' ? 'selected' : '' }}>បុគ្គល (Individual)</option>
+                                                    <option value="business" {{ old('type') == 'business' ? 'selected' : '' }}>អាជីវកម្ម (Business)</option>
+                                                </select>
                                                 @error('type')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                             </div>
                                         </div>
@@ -186,10 +190,16 @@
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="document_path">រូបថត/ឯកសារ</label>
+                                                <label for="profile">រូបថត/ឯកសារ</label>
                                                 <div class="custom-file">
-                                                    <input type="file" class="custom-file-input @error('document_path') is-invalid @enderror" id="document_path" name="document_path" onchange="previewImage(event)">
-                                                    <label class="custom-file-label" for="document_path">ជ្រើសរើសឯកសារ...</label>
+                                                    <input type="file" class="custom-file-input @error('profile') is-invalid @enderror" id="profile" name="profile" onchange="previewImage(event)" accept="image/*">
+                                                    <label class="custom-file-label" for="profile">ជ្រើសរើសរូបថត (Image)...</label>
+                                                </div>
+                                                @error('profile')<div class="text-danger mt-2 small">{{ $message }}</div>@enderror
+
+                                                <div class="custom-file mt-3">
+                                                    <input type="file" class="custom-file-input @error('document_path') is-invalid @enderror" id="document_path" name="document_path" onchange="updateFileName(event)" accept=".pdf,.doc,.docx">
+                                                    <label class="custom-file-label" for="document_path">ជ្រើសរើសឯកសារភ្ជាប់ (docx, pdf)...</label>
                                                 </div>
                                                 @error('document_path')<div class="text-danger mt-2 small">{{ $message }}</div>@enderror
                                             </div>
@@ -252,6 +262,16 @@
             preview.src = '#';
             preview.classList.add('d-none');
             empty.classList.remove('d-none');
+        }
+    }
+
+    function updateFileName(event) {
+        const input = event.target;
+        if (input.files && input.files.length > 0) {
+            const fileName = input.files[0].name;
+            input.nextElementSibling.innerText = fileName;
+        } else {
+            input.nextElementSibling.innerText = 'ជ្រើសរើសឯកសារភ្ជាប់ (docx, pdf)...';
         }
     }
 

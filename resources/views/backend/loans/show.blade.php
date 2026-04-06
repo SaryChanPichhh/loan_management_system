@@ -21,6 +21,17 @@
             </div>
             <div class="col-5 align-self-center">
                 <div class="float-right">
+                    {{-- Collateral Management button --}}
+                    <a href="{{ route('loans.collaterals.index', $loan->id) }}"
+                       class="btn btn-{{ $collateralInsufficient ? 'danger' : 'secondary' }} btn-sm mr-1"
+                       title="{{ $collateralInsufficient ? 'Collateral below 120% — action required!' : 'Manage Collateral' }}">
+                        <i data-feather="shield"></i> Collateral
+                        @if($collateralInsufficient)
+                            <span class="badge badge-light ml-1" style="font-size:0.7rem;">
+                                <i data-feather="alert-triangle" style="width:10px;height:10px;"></i> Insufficient
+                            </span>
+                        @endif
+                    </a>
                     <a href="{{ route('loans.schedule.print', $loan->id) }}" target="_blank" class="btn btn-secondary btn-sm mr-1">
                         <i data-feather="printer"></i> Print Schedule
                     </a>

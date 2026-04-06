@@ -25,17 +25,29 @@
         </td>
 
         <td class="text-center">
-            @if($c->document_path)
-                <i class="fas fa-download text-primary"
-                   style="cursor:pointer;"
-                   data-toggle="modal"
-                   data-target="#imageModal"
-                   data-image="{{ asset('uploads/'.$c->document_path) }}">
+            @if($c->profile)
+                <i class="fas fa-image text-primary"
+                    style="cursor:pointer;"
+                    data-toggle="modal"
+                    data-target="#imageModal"
+                    data-image="{{ asset('profile/'.$c->profile) }}"
+                    title="View Profile">
                 </i>
+            @else
+                ---
             @endif
         </td>
-
-        <td>
+        <td class="text-center">
+            @if($c->document_path)
+                <a href="{{ asset('customer_document/'.$c->document_path) }}" target="_blank" title="View Document">
+                    <i class="fas fa-file-alt text-info"></i>
+                </a>
+            @else
+                ---
+            @endif
+        </td>
+        
+        <td class="text-right">
             <div class="dropdown sub-dropdown">
                 <a class="btn-link text-muted dropdown-toggle" data-toggle="dropdown">
                     <i data-feather="more-horizontal"></i>

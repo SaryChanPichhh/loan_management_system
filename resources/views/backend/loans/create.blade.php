@@ -510,13 +510,7 @@ $(document).ready(function () {
             $('#guarantor_flag').html('<span class="dot dot-ok"></span>Guarantor: មិនតម្រូវ (កម្ចីក្រោម $500)');
         }
 
-        if (cAbove > 0 && amount > cAbove) {
-            $('#collateral_flag').html('<span class="dot dot-err"></span><span class="text-warning">Collateral Required</span> (ចំនួន > $' + cAbove.toLocaleString() + ')');
-            $('#collateral_warning').show();
-            $('#collateral_warning_text').html(`ចំនួនទឹកប្រាក់លើស $${cAbove.toLocaleString()} — <strong>ត្រូវការទ្រព្យបញ្ចាំរូបវន្ត</strong> តម្លៃយ៉ាងហោចណាស់ ${parseFloat(amount * 1.2).toLocaleString()}$`);
-        } else {
-            $('#collateral_flag').html('<span class="dot dot-ok"></span>Collateral: មិនតម្រូវ');
-        }
+        $('#collateral_flag').html('<span class="dot dot-ok"></span>Collateral: មិនតម្រូវ');
     }
 
 

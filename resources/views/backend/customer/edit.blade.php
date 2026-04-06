@@ -112,7 +112,11 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="type">ប្រភេទ <span class="text-danger">*</span></label>
-                                                <input type="text" id="type" name="type" class="form-control @error('type') is-invalid @enderror" value="{{ old('type', $customer->type) }}" placeholder="បញ្ចូលប្រភេទអតិថិជន">
+                                                <select id="type" name="type" class="form-control custom-select @error('type') is-invalid @enderror">
+                                                    <option value="">ជ្រើសរើសប្រភេទ</option>
+                                                    <option value="individual" {{ old('type', $customer->type) == 'individual' ? 'selected' : '' }}>បុគ្គល (Individual)</option>
+                                                    <option value="business" {{ old('type', $customer->type) == 'business' ? 'selected' : '' }}>អាជីវកម្ម (Business)</option>
+                                                </select>
                                                 @error('type')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                             </div>
                                         </div>
@@ -186,20 +190,35 @@
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="document_path">រូបថត/ឯកសារថ្មី (ទុកទទេបើមិនចង់ប្តូរ)</label>
+                                                <label for="profile">រូបថត/ឯកសារថ្មី (ទុកទទេបើមិនចង់ប្តូរ)</label>
                                                 <div class="custom-file">
-                                                    <input type="file" class="custom-file-input @error('document_path') is-invalid @enderror" id="document_path" name="document_path" onchange="previewImage(event)" data-default-src="{{ $customer->document_path ? asset('uploads/' . $customer->document_path) : '' }}">
-                                                    <label class="custom-file-label" for="document_path">ជ្រើសរើសឯកសារ...</label>
+                                                    <input type="file" class="custom-file-input @error('profile') is-invalid @enderror" id="profile" name="profile" onchange="previewImage(event)" data-default-src="{{ $customer->profile ? asset('profile/' . $customer->profile) : '' }}" accept="image/*">
+                                                    <label class="custom-file-label" for="profile">ជ្រើសរើសរូបថត (Image)...</label>
+                                                </div>
+                                                @error('profile')<div class="text-danger mt-2 small">{{ $message }}</div>@enderror
+
+                                                <div class="custom-file mt-3">
+                                                    <input type="file" class="custom-file-input @error('document_path') is-invalid @enderror" id="document_path" name="document_path" onchange="updateFileName(event)" accept=".pdf,.doc,.docx">
+                                                    <label class="custom-file-label" for="document_path">ជ្រើសរើសឯកសារភ្ជាប់ថ្មី (docx, pdf)...</label>
                                                 </div>
                                                 @error('document_path')<div class="text-danger mt-2 small">{{ $message }}</div>@enderror
+
+                                                @if($customer->document_path)
+                                                    <div class="mt-2 text-right">
+                                                        <small class="text-muted">ឯកសារបច្ចុប្បន្ន៖</small>
+                                                        <a href="{{ asset('customer_document/' . $customer->document_path) }}" target="_blank" class="btn btn-sm btn-outline-info ml-1">
+                                                            <i data-feather="file-text" style="width:14px; height:14px;"></i> មើលឯកសារ
+                                                         </a>
+                                                     </div>
+                                                 @endif
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>រូបភាពបច្ចុប្បន្ន / មើលរូបភាពថ្មី</label>
                                                 <div class="border rounded d-flex align-items-center justify-content-center bg-light" style="min-height: 200px; border: 2px dashed #e8eef3 !important;">
-                                                    @if($customer->document_path)
-                                                        <img id="preview" src="{{ asset('uploads/' . $customer->document_path) }}" class="img-fluid rounded shadow-sm" style="max-height: 180px; object-fit: cover;" alt="Preview">
+                                                    @if($customer->profile)
+                                                        <img id="preview" src="{{ asset('profile/' . $customer->profile) }}" class="img-fluid rounded shadow-sm" style="max-height: 180px; object-fit: cover;" alt="Preview">
                                                         <div id="empty-preview" class="text-center text-muted d-none">
                                                             <i data-feather="image" class="mb-2 text-secondary" style="width: 40px; height: 40px;"></i>
                                                             <p class="mb-0">មិនទាន់មានរូបភាព</p>
@@ -268,6 +287,16 @@
                 preview.classList.add('d-none');
                 empty.classList.remove('d-none');
             }
+        }
+    }
+
+    function updateFileName(event) {
+        const input = event.target;
+        if (input.files && input.files.length > 0) {
+            const fileName = input.files[0].name;
+            input.nextElementSibling.innerText = fileName;
+        } else {
+            input.nextElementSibling.innerText = 'ជ្រើសរើសឯកសារភ្ជាប់ថ្មី (docx, pdf)...';
         }
     }
 

@@ -103,10 +103,33 @@
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label>ឯកសារភ្ជាប់ (រូបភាព ឬ PDF)</label>
-                                            <input type="file" name="document" class="form-control-file">
+                                            <label>រូបថតអ្នកធានា (Profile)</label>
+                                            <div class="custom-file">
+                                                <input type="file" name="guarantor_profile" class="custom-file-input" id="guarantor_profile" accept="image/*">
+                                                <label class="custom-file-label" for="guarantor_profile">ជ្រើសរើសរូបថតថ្មី...</label>
+                                            </div>
+                                            @if($guarantor->guarantor_profile)
+                                                <div class="mt-2">
+                                                    <a href="{{ asset('guarantor_profile/' . $guarantor->guarantor_profile) }}" target="_blank" class="btn btn-xs btn-outline-info">
+                                                        <i class="fa fa-image"></i> មើលរូបភាពបច្ចុប្បន្ន
+                                                    </a>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>ឯកសារភ្ជាប់ (docx, pdf)</label>
+                                            <div class="custom-file">
+                                                <input type="file" name="document_path" class="custom-file-input" id="document_path" accept=".docx,.pdf">
+                                                <label class="custom-file-label" for="document_path">ជ្រើសរើសឯកសារថ្មី...</label>
+                                            </div>
                                             @if($guarantor->document_path)
-                                                <small class="text-success mt-2 d-block">ឯកសារបច្ចុប្បន្នត្រូវបានភ្ជាប់រួចហើយ</small>
+                                                <div class="mt-2">
+                                                    <a href="{{ asset('guarantor_document/' . $guarantor->document_path) }}" target="_blank" class="btn btn-xs btn-outline-info">
+                                                        <i class="fa fa-file-pdf"></i> មើលឯកសារបច្ចុប្បន្ន
+                                                    </a>
+                                                </div>
                                             @endif
                                         </div>
                                     </div>
@@ -133,4 +156,12 @@
         </div>
     </div>
 </div>
+@push('scripts')
+<script>
+    $('.custom-file-input').on('change', function() {
+        let fileName = $(this).val().split('\\').pop();
+        $(this).next('.custom-file-label').addClass("selected").html(fileName);
+    });
+</script>
+@endpush
 @endsection

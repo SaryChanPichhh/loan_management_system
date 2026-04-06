@@ -21,41 +21,6 @@ class UserSeeder extends Seeder
 
         $users = [
             [
-                'name' => 'Sok Dara',
-                'username' => 'dara.sok',
-                'email' => 'dara@loan.com',
-                'password' => Hash::make('password'),
-                'role' => $staffRole
-            ],
-            [
-                'name' => 'Keo Bopha',
-                'username' => 'bopha.keo',
-                'email' => 'bopha@loan.com',
-                'password' => Hash::make('password'),
-                'role' => $staffRole
-            ],
-            [
-                'name' => 'Chivorn Meng',
-                'username' => 'chivorn.m',
-                'email' => 'chivorn@loan.com',
-                'password' => Hash::make('password'),
-                'role' => $staffRole
-            ],
-            [
-                'name' => 'Vannak Lim',
-                'username' => 'vannak.l',
-                'email' => 'vannak@loan.com',
-                'password' => Hash::make('password'),
-                'role' => $staffRole
-            ],
-            [
-                'name' => 'Devit',
-                'username' => 'devit009',
-                'email' => 'devit@loan.com',
-                'password' => Hash::make('123456'),
-                'role' => $adminRole
-            ],
-            [
                 'name' => 'setec',
                 'username' => 'setec',
                 'email' => 'setec@loan.com',

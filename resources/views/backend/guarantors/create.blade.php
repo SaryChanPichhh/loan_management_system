@@ -102,8 +102,20 @@
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label>ឯកសារភ្ជាប់ (រូបភាព ឬ PDF)</label>
-                                            <input type="file" name="document" class="form-control-file">
+                                            <label>រូបថតអ្នកធានា (Profile)</label>
+                                            <div class="custom-file">
+                                                <input type="file" name="guarantor_profile" class="custom-file-input" id="guarantor_profile" accept="image/*">
+                                                <label class="custom-file-label" for="guarantor_profile">ជ្រើសរើសរូបថត...</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>ឯកសារភ្ជាប់ (docx, pdf)</label>
+                                            <div class="custom-file">
+                                                <input type="file" name="document_path" class="custom-file-input" id="document_path" accept=".docx,.pdf">
+                                                <label class="custom-file-label" for="document_path">ជ្រើសរើសឯកសារ...</label>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -129,4 +141,12 @@
         </div>
     </div>
 </div>
+@push('scripts')
+<script>
+    $('.custom-file-input').on('change', function() {
+        let fileName = $(this).val().split('\\').pop();
+        $(this).next('.custom-file-label').addClass("selected").html(fileName);
+    });
+</script>
+@endpush
 @endsection

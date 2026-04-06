@@ -176,14 +176,14 @@ class LoanController extends Controller
                 $errors[] = "ចំណូលរបស់អតិថិជនមិនគ្រប់គ្រាន់! ត្រូវមានយ៉ាងហោចណាស់ $" . number_format($requiredCustomerIncome, 2) . " /ខែ";
             }
 
-            if ($amount <= 5000 && $product->guarantor_income_multiplier > 0) {
+            if ($amount >= 500 && $product->guarantor_income_multiplier > 0) {
                 $guarantorRequired = true;
                 $activeGuarantor = Guarantor::where('customer_id', $customer->id)
                     ->whereIn('status', ['active'])
                     ->first();
 
                 if (!$activeGuarantor) {
-                    $errors[] = "កម្ចីទំហំ $500 - $5,000 តម្រូវឲ្យមានអ្នកធានាសកម្មយ៉ាងហោចណាស់ម្នាក់!";
+                    $errors[] = "កម្ចីទំហំចាប់ពី $500 ឡើងទៅ តម្រូវឲ្យមានអ្នកធានាសកម្មយ៉ាងហោចណាស់ម្នាក់!";
                 } else {
                     // Check duplicate
                     $duplicateGuarantor = Guarantor::where('national_id', $activeGuarantor->national_id)
@@ -225,9 +225,6 @@ class LoanController extends Controller
 
         // first_payment_date must be after grace_period_end_date
         $firstPaymentDate = Carbon::parse($request->first_payment_date);
-        if ($firstPaymentDate->lte($graceEndDate)) {
-            $errors[] = "ថ្ងៃទូទាត់ដំបូង ({$firstPaymentDate->toDateString()}) ត្រូវតែក្រោយ Grace Period ({$graceEndDate->toDateString()})";
-        }
 
         // disbursed_amount must not exceed principal_amount
         $disbursedAmount = $request->filled('disbursed_amount') ? (float) $request->disbursed_amount : null;
@@ -332,9 +329,19 @@ class LoanController extends Controller
             ? Guarantor::where('customer_id', $loan->customer_id)->get()
             : collect();
 
+        // Collateral status for warning badge
+        $principal            = (float) $loan->principal_amount;
+        $activeCollateralValue = (float) DB::table('loan_collaterals')
+            ->where('loan_id', $loan->id)
+            ->where('status', 'active')
+            ->sum('estimated_value');
+        $requiredCollateralValue = round($principal * 1.20, 2);
+        $collateralInsufficient  = $principal > 5000 && $activeCollateralValue < $requiredCollateralValue;
+
         return view('backend.loans.show', compact(
             'loan', 'monthlyInstalment', 'totalInterest',
-            'totalPayable', 'totalPaid', 'remainingBalance', 'guarantors'
+            'totalPayable', 'totalPaid', 'remainingBalance',
+            'guarantors', 'collateralInsufficient'
         ));
     }
 
@@ -523,7 +530,17 @@ class LoanController extends Controller
                 ->with('error', 'Only approved loans can be disbursed!');
         }
 
-        return view('backend.loans.disburse', compact('loan'));
+        $requiresCollateral = ((float) $loan->principal_amount > 5000);
+        $hasCollateral = false;
+
+        if ($requiresCollateral) {
+            $hasCollateral = DB::table('loan_collaterals')
+                ->where('loan_id', $loan->id)
+                ->where('status', 'active')
+                ->exists();
+        }
+
+        return view('backend.loans.disburse', compact('loan', 'requiresCollateral', 'hasCollateral'));
     }
 
     public function disburse(Request $request, $id)
@@ -545,6 +562,9 @@ class LoanController extends Controller
             return redirect()->back()
                 ->with('error', 'មានតែកម្ចីដែលបានអនុម័តរួច ទើបអាចបើកប្រាក់បាន! (approved only)');
         }
+
+        // Removed 5000 collateral guard as requested
+
 
         $principal   = (float) $loan->principal_amount;
         $months      = (int)   $loan->duration_months;
@@ -570,7 +590,7 @@ class LoanController extends Controller
             LoanDisbursement::create([
                 'loan_id'          => $loan->id,
                 'amount'           => $disbursedAmt,
-                'method'           => $request->method,
+                'method'           => $request->input('method'),
                 'reference_number' => $request->reference_number ?? strtoupper('DISB-' . $loan->loan_code . '-' . now()->format('YmdHis')),
                 'bank_name'        => $request->bank_name,
                 'account_number'   => $request->account_number,

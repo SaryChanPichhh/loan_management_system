@@ -28,10 +28,20 @@ class CustomerController extends Controller
     }
     public function create()
     {
-        return view('backend.customer.create');
+        $lastCustomer = Customer::withTrashed()->orderBy('id', 'desc')->first();
+        $nextId = $lastCustomer ? $lastCustomer->id + 1 : 1;
+        $generatedCode = 'CUST-' . str_pad($nextId, 5, '0', STR_PAD_LEFT);
+        
+        return view('backend.customer.create', compact('generatedCode'));
     }
     public function store(Request $request)
     {
+        // Auto-generate code if not provided or to ensure uniqueness
+        $lastCustomer = Customer::withTrashed()->orderBy('id', 'desc')->first();
+        $nextId = $lastCustomer ? $lastCustomer->id + 1 : 1;
+        $generatedCode = 'CUST-' . str_pad($nextId, 5, '0', STR_PAD_LEFT);
+        $request->merge(['code' => $generatedCode]);
+
         $request->validate([
             'code' => 'required|unique:customers,code',
             'name' => 'required|max:255',
@@ -40,26 +50,33 @@ class CustomerController extends Controller
             'email' => 'nullable|email|max:255',
             'address' => 'nullable|max:255',
             'national_id' => 'nullable|max:50',
-            'date_of_birth' => 'nullable|date',
+            'date_of_birth' => 'nullable|date|before_or_equal:' . now()->subYears(18)->format('Y-m-d'),
             'age_verified' => 'nullable|boolean',
             'occupation' => 'nullable|max:255',
             'monthly_income' => 'nullable|numeric',
             'has_existing_loan' => 'nullable|boolean',
             'credit_score' => 'nullable|integer',
-            'type' => 'required',
+            'type' => 'required|in:individual,business',
             'status' => 'required|boolean',
-            'document_path' => 'nullable|file|mimes:pdf,jpg,png|max:2048'
+            'document_path' => 'nullable|file|mimes:pdf,docx,doc|max:2048',
+            'profile' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
         ]);
 
         $fileName = null;
-
         if ($request->hasFile('document_path')) {
-            $fileName = time() . '.' . $request->file('document_path')->extension();
-            $request->file('document_path')->move(public_path('uploads'), $fileName);
+            $fileName = time() . '_doc.' . $request->file('document_path')->extension();
+            $request->file('document_path')->move(public_path('customer_document'), $fileName);
         }
 
-        $data = $request->except('document_path');
+        $profileName = null;
+        if ($request->hasFile('profile')) {
+            $profileName = time() . '_profile.' . $request->file('profile')->extension();
+            $request->file('profile')->move(public_path('profile'), $profileName);
+        }
+
+        $data = $request->except(['document_path', 'profile']);
         $data['document_path'] = $fileName;
+        $data['profile'] = $profileName;
         $data['created_by'] = auth()->id();
         $data['age_verified'] = $request->has('age_verified');
         $data['has_existing_loan'] = $request->has('has_existing_loan');
@@ -90,15 +107,16 @@ class CustomerController extends Controller
             'email' => 'nullable|email|max:255',
             'address' => 'nullable|max:255',
             'national_id' => 'nullable|max:50',
-            'date_of_birth' => 'nullable|date',
+            'date_of_birth' => 'nullable|date|before_or_equal:' . now()->subYears(18)->format('Y-m-d'),
             'age_verified' => 'nullable|boolean',
             'occupation' => 'nullable|max:255',
             'monthly_income' => 'nullable|numeric',
             'has_existing_loan' => 'nullable|boolean',
             'credit_score' => 'nullable|integer',
-            'type' => 'required',
+            'type' => 'required|in:individual,business',
             'status' => 'required|boolean',
-            'document_path' => 'nullable|file|mimes:pdf,jpg,png|max:2048'
+            'document_path' => 'nullable|file|mimes:pdf,docx,doc|max:2048',
+            'profile' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
         ]);
 
         $data = $request->except('document_path');
@@ -106,9 +124,15 @@ class CustomerController extends Controller
         $data['has_existing_loan'] = $request->has('has_existing_loan');
 
         if ($request->hasFile('document_path')) {
-            $fileName = time() . '.' . $request->file('document_path')->extension();
-            $request->file('document_path')->move(public_path('uploads'), $fileName);
+            $fileName = time() . '_doc.' . $request->file('document_path')->extension();
+            $request->file('document_path')->move(public_path('customer_document'), $fileName);
             $data['document_path'] = $fileName;
+        }
+
+        if ($request->hasFile('profile')) {
+            $profileName = time() . '_profile.' . $request->file('profile')->extension();
+            $request->file('profile')->move(public_path('profile'), $profileName);
+            $data['profile'] = $profileName;
         }
 
         $customer->update($data);

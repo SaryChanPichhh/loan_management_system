@@ -273,11 +273,11 @@ class LoanApplicationController extends Controller
                 return "ចំណូលរបស់អតិថិជនមិនគ្រប់គ្រាន់! ត្រូវមានចំណូលយ៉ាងហោចណាស់ $" . number_format($requiredCustomerIncome, 2) . " /ខែ (ស្មើនឹង ១.៥ ដងនៃប្រាក់សងប្រចាំខែ $" . number_format($monthlyPayment, 2) . ")";
             }
 
-            // If <= 5000 and multiplier > 0, guarantor is required and must have sufficient income
-            if ($amount <= 5000 && $product->guarantor_income_multiplier > 0) {
+            // If >= 500 and multiplier > 0, guarantor is required and must have sufficient income
+            if ($amount >= 500 && $product->guarantor_income_multiplier > 0) {
                 $hasGuarantor = Guarantor::where('customer_id', $customer->id)->whereIn('status', ['active'])->exists();
                 if (!$hasGuarantor) {
-                    return "កម្ចីទំហំ $500 - $5,000 តម្រូវឲ្យមានអ្នកធានាសកម្មយ៉ាងហោចណាស់ម្នាក់! សូមបញ្ចូលអ្នកធានាសម្រាប់អតិថិជននេះជាមុនសិន។";
+                    return "កម្ចីទំហំចាប់ពី $500 ឡើងទៅ តម្រូវឲ្យមានអ្នកធានាសកម្មយ៉ាងហោចណាស់ម្នាក់! សូមបញ្ចូលអ្នកធានាសម្រាប់អតិថិជននេះជាមុនសិន។";
                 }
 
                 $requiredIncome = $monthlyPayment * $product->guarantor_income_multiplier;
@@ -292,10 +292,8 @@ class LoanApplicationController extends Controller
             }
         }
 
-        if ($amount > 5000) {
-            // Business rule: Collateral required. At the application phase, we just warn the user.
-            session()->flash('warning', "ចំណាំ: កម្ចីទំហំលើសពី $5,000 តម្រូវឲ្យមានទ្រព្យបញ្ចាំរូបវន្តដែលមានតម្លៃយ៉ាងហោចណាស់ ១២០% នៃទំហំកម្ចី ពេលបង្កើតកម្ចីជាក់ស្តែង។");
-        }
+        // Removed 5000 collateral warning as requested
+
 
         return null;
     }

@@ -48,8 +48,9 @@
                                 <th>អាស័យដ្ខាន</th>
                                 <th>ប្រភេទ</th>
                                 <th>ស្ថានភាព</th>
+                                <th class="text-center">រូបភាព</th>
                                 <th class="text-center">ឯកសារ</th>
-                                <th></th>
+                                <th class="text-right">សកម្មភាព</th>
                             </tr>
                         </thead>
                         <tbody id="customerTableBody">

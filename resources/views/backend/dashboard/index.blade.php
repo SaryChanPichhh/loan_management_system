@@ -289,25 +289,6 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-12">
-                    <div class="card">
-                        <div class="card-body">
-                            <h4 class="card-title">ស្ថានភាពសងត្រឡប់</h4>
-                            <ul class="list-inline text-right">
-                                <li class="list-inline-item">
-                                    <h5><i class="fa fa-circle mr-1 text-success"></i>បង់រួច</h5>
-                                </li>
-                                <li class="list-inline-item">
-                                    <h5><i class="fa fa-circle mr-1 text-warning"></i>មិនទាន់បង់</h5>
-                                </li>
-                                <li class="list-inline-item">
-                                    <h5><i class="fa fa-circle mr-1 text-danger"></i>ហួសកំណត់</h5>
-                                </li>
-                            </ul>
-                            <div id="morris-repayment-chart"></div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
